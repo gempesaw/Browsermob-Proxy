@@ -5,6 +5,8 @@ use strict;
 use warnings;
 use Moo;
 use Carp;
+use JSON;
+use LWP::UserAgent;
 use IO::Socket::INET;
 use Browsermob::Proxy;
 
@@ -118,6 +120,23 @@ sub create_proxy {
 
     return $proxy;
 }
+
+=method get_proxies
+
+Get a list of currently registered proxies.
+
+=cut
+
+sub get_proxies {
+    my $self = shift;
+    my $ua = shift || LWP::UserAgent->new;
+
+    my $res = $ua->get('http://localhost:' . $self->server_port . '/proxy');
+    if ($res->is_success) {
+        return from_json($res->decoded_content);
+    }
+}
+
 
 sub _is_listening {
     my $self = shift;

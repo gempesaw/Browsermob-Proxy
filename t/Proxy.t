@@ -24,4 +24,6 @@ PROXY_PORT: {
     cmp_ok($choose->port, '==', 9092, 'We can pick our own ports!');
 }
 
+my $proxy_list = $bmp->get_proxies->{proxyList};
+ok(scalar @$proxy_list eq 0, 'Proxies automatically delete themselves');
 done_testing;
