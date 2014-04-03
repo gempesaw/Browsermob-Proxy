@@ -12,10 +12,16 @@ my $bmp = Browsermob::Server->new(
     path => $binary,
     port => 63638
 );
+$bmp->start;
 
-my $proxy = $bmp->create_proxy();
+PROXY_PORT: {
+    my $proxy = $bmp->create_proxy();
 
-isa_ok($proxy, 'Browsermob::Proxy');
+    isa_ok($proxy, 'Browsermob::Proxy');
+    ok(defined $proxy->port, 'Our new proxy has its own port!');
 
+    my $choose = $bmp->create_proxy(port => 9092);
+    cmp_ok($choose->port, '==', 9092, 'We can pick our own ports!');
+}
 
 done_testing;

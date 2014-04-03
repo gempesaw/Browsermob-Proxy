@@ -4,8 +4,9 @@ package Browsermob::Server;
 use strict;
 use warnings;
 use Moo;
-use IO::Socket::INET;
 use Carp;
+use IO::Socket::INET;
+use Browsermob::Proxy;
 
 =head1 SYNOPSIS
 
@@ -78,7 +79,7 @@ sub start {
     else {
         # If I don't know the pid, then I'm the child and we should
         # exec to replace ourselves with the proxy
-        my $cmd = 'sh ' . $self->path . ' -port ' . $self->server_port;
+        my $cmd = 'sh ' . $self->path . ' -port ' . $self->server_port . ' 2>&1 > /dev/null';
         exec($cmd);
         exit(0);
     }
@@ -108,11 +109,13 @@ server does not create a proxy.
 =cut
 
 sub create_proxy {
-    my $self = shift;
+    my ($self, %args) = @_;
 
-    my $proxy = Browsermob::Proxy->new;
-    use Data::Dumper; use DDP;
-    p $proxy;
+    my $proxy = Browsermob::Proxy->new(
+        server_port => $self->server_port,
+        %args
+    );
+
     return $proxy;
 }
 
