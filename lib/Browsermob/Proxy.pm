@@ -4,6 +4,7 @@ package Browsermob::Proxy;
 use Moo;
 use JSON;
 use Net::HTTP::Spore;
+use Net::HTTP::Spore::Middleware::DefaultParams;
 
 =head1 SYNOPSIS
 
@@ -113,6 +114,7 @@ has _spore => (
             # trace => 2
         );
         $client->enable('Format::JSON');
+        $client->enable('DefaultParams', default_params => { port => $self->port });
         return $client;
     },
     handles => [keys $spec->{methods}]
