@@ -18,15 +18,27 @@ use Browsermob::Proxy;
     $bmp->start;
     my $proxy = $bmp->create_proxy;
 
+    print $proxy->port;
     $proxy->create_har('Test');
+    # generate traffic across your port
     $proxy->har; # returns a HAR
 
 =cut
 
 =head1 DESCRIPTION
 
-Browsermob Proxy allows us to create proxies to generate HARs from
-network traffic. It's especially useful in tandem with Webdriver.
+From L<http://bmp.lightbody.net/>: BrowserMob proxy is based on
+technology developed in the Selenium open source project and a
+commercial load testing and monitoring service originally called
+BrowserMob and now part of Neustar.
+
+It can capture performance data for web apps (via the HAR format), as
+well as manipulate browser behavior and traffic, such as whitelisting
+and blacklisting content, simulating network traffic and latency, and
+rewriting HTTP requests and responses.
+
+This module is a Perl client interface to control the server and its
+proxies. It uses L<Net::HTTP::Spore>.
 
 =cut
 
@@ -43,8 +55,8 @@ has path => (
 
 =attr port
 
-The port on which the proxy server should run. This is not the port on
-which you should have other clients connect to.
+Optional. The port on which the proxy server should run. This is not
+the port that you should have other clients connect.
 
 =cut
 
@@ -62,11 +74,8 @@ has _pid => (
 
 =method start
 
-Start a browsermob proxy on port. Starting the server does not create
-any proxies yet.
-
-    my $bmp = Browsermob::Server->new;
-    $bmp->start;
+Start a browsermob proxy on C<port>. Starting the server does not create
+any proxies.
 
 =cut
 
@@ -89,10 +98,9 @@ sub start {
 
 =method stop
 
-Stop the forked browsermob-proxy server.
-
-    my $bmp = Browsermob::Server->new;
-    $bmp->stop;
+Stop the forked browsermob-proxy server. This does not work all the
+time, although the server seems to get GC'd all on its own, even after
+ignoring a C<SIGTERM>.
 
 =cut
 
@@ -104,9 +112,12 @@ sub stop {
 =method create_proxy
 
 After starting the server, or connecting to an existing one, use
-`create_proxy` to get a proxy that you can use with your tests. No
+C<create_proxy> to get a proxy that you can use with your tests. No
 proxies actually exist until you call create_proxy; starting the
 server does not create a proxy.
+
+    my $proxy = $bmp->create_proxy(); # returns a Browsermob::Proxy object
+    my $proxy = $bmp->create_proxy(port => 1337);
 
 =cut
 
@@ -124,6 +135,9 @@ sub create_proxy {
 =method get_proxies
 
 Get a list of currently registered proxies.
+
+    my $proxy_aref = $bmp->get_proxies->{proxyList};
+    print scalar @$proxy_aref;
 
 =cut
 
