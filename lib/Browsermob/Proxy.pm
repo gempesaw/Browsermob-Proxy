@@ -61,13 +61,16 @@ my $spec = {
     formats => ['json'],
     version => '0.01',
     methods => {
-        get_ports => {
+        get_proxies => {
             path => '/',
             method => 'GET',
             description => 'Get a list of ports attached to ProxyServer instances managed by ProxyManager'
         },
-        create_proxy => {
-            path => '/',
+        create => {
+            path => '/:port',
+            optional_params => [
+                'port'
+            ],
             method => 'POST',
             description => 'Create a new proxy. Returns a JSON object {"port": your_port} on success"'
         },
