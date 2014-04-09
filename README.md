@@ -8,6 +8,8 @@ version 0.01
 
 # SYNOPSIS
 
+Standalone:
+
     my $proxy = Browsermob::Proxy->new(
         server_port => 9090
         # port => 9092
@@ -18,16 +20,32 @@ version 0.01
     # create network traffic across your port
     $proxy->har; # returns a HAR as a JSON blob
 
+with [Browsermob::Server](https://metacpan.org/pod/Browsermob::Server):
+
+    my $server = Browsermob::Server->new(
+        server_port = 9090
+    );
+    $server->start; # ignore if your server is already running
+
+    my $proxy = $server->create_proxy;
+    $proxy->new_har('proxy from server!');
+
 # DESCRIPTION
 
-An instance of a Browsermob proxy that you can use to capture HARs,
-filter traffic, limit network speeds, etc. This can be used completely
-independently of [Browsermob::Server](https://metacpan.org/pod/Browsermob::Server) if you want to manage the
-server separately.
+From [http://bmp.lightbody.net/](http://bmp.lightbody.net/): BrowserMob proxy is based on
+technology developed in the Selenium open source project and a
+commercial load testing and monitoring service originally called
+BrowserMob and now part of Neustar.
 
-If you are manually instantiating instances of this class, you must
-specify the `server_port` so we know where to find the
-browsermob-proxy server.
+It can capture performance data for web apps (via the HAR format), as
+well as manipulate browser behavior and traffic, such as whitelisting
+and blacklisting content, simulating network traffic and latency, and
+rewriting HTTP requests and responses.
+
+This module is a Perl client interface to interact with the server and
+its proxies. It uses [Net::HTTP::Spore](https://metacpan.org/pod/Net::HTTP::Spore). You can use
+[Browsermob::Server](https://metacpan.org/pod/Browsermob::Server) to manage the server itself in addition to using
+this module to handle the proxies.
 
 # ATTRIBUTES
 
@@ -48,27 +66,44 @@ Get a list of ports attached to a ProxyServer managed by ProxyManager
 
 Create a new proxy. This method is automatically invoked upon
 instantiation, so you shouldn't have to call it unless you're doing
-something unexpected.
+something unexpected. In fact, if you do call it, things will probably
+get messed up.
 
 ## delete\_proxy
 
 Shutdown the proxy and close the port. This is automatically invoked
 when the `$proxy` goes out of scope, so you shouldn't have to call
-this either.
+this either. In fact, if you do call it, things will probably
+get messed up.
 
     $proxy->delete_proxy;
 
-## new\_har
-
 ## new
 
-Instantiate a new proxy. `server_port` is a required argument; if
-you're using `BrowserMob::Server`, just invoke that class's
-`create_proxy` method.
+Instantiate a new proxy. `server_port` is the only required argument
+if you're instantiating this class manually.
 
     my $proxy = $bmp->create_proxy; # invokes new for you
 
     my $proxy = BrowserMob::Proxy->new(server_port => 63638);
+
+## new\_har
+
+After creating a proxy, `new_har` creates a new HAR attached to the
+proxy and returns the HAR content if there was a previous one. If no
+argument is passed, the initial page ref will be "Page 1"; you can
+also pass a string to choose your own initial page ref.
+
+    $proxy->new_har;
+    $proxy->new_har('Google');
+
+# SEE ALSO
+
+Please see those modules/websites for more information related to this module.
+
+- [\* http://bmp.lightbody.net/](https://metacpan.org/pod/*&#x20;http:#bmp.lightbody.net)
+- [\* https://github.com/lightbody/browsermob-proxy](https://metacpan.org/pod/*&#x20;https:#github.com-lightbody-browsermob-proxy)
+- [\* Browsermob::Server](https://metacpan.org/pod/*&#x20;Browsermob::Server)
 
 # BUGS
 
@@ -82,3 +117,15 @@ feature.
 # AUTHOR
 
 Daniel Gempesaw <gempesaw@gmail.com>
+
+# POD ERRORS
+
+Hey! __The above document had some coding errors, which are explained below:__
+
+- Around line 110:
+
+    alternative text '\* http://bmp.lightbody.net/' contains non-escaped | or /
+
+- Around line 114:
+
+    alternative text '\* https://github.com/lightbody/browsermob-proxy' contains non-escaped | or /
