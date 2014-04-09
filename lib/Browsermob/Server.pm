@@ -12,51 +12,52 @@ use Browsermob::Proxy;
 
 =head1 SYNOPSIS
 
-    my $bmp = Browsermob::Server->new(
+    my $server = Browsermob::Server->new(
         path => '/path/to/browsermob-proxy'
     );
-    $bmp->start;
-    my $proxy = $bmp->create_proxy;
+    $server->start;
+    my $proxy = $server->create_proxy;
 
     print $proxy->port;
     $proxy->create_har('Test');
     # generate traffic across your port
     $proxy->har; # returns a HAR
 
+Alternatively, assuming there's a BMP server on 63636 for example,
+
+    my $server = Browsermob::Server->new(
+        port => 63636
+    );
+    my $proxy = $server->create_proxy;
+
 =cut
 
 =head1 DESCRIPTION
 
-From L<http://bmp.lightbody.net/>: BrowserMob proxy is based on
-technology developed in the Selenium open source project and a
-commercial load testing and monitoring service originally called
-BrowserMob and now part of Neustar.
-
-It can capture performance data for web apps (via the HAR format), as
-well as manipulate browser behavior and traffic, such as whitelisting
-and blacklisting content, simulating network traffic and latency, and
-rewriting HTTP requests and responses.
-
-This module is a Perl client interface to control the server and its
-proxies. It uses L<Net::HTTP::Spore>.
+This class provides a way to control the Browsermob Proxy server
+within Perl. There are only a few public methods for starting and
+stopping the server. You also have the option of instantiating a
+server object and pointing it towards an existing BMP server on
+localhost, and just using it to avoid having to pass the server_port
+arg when instantiating new proxies.
 
 =cut
 
 =attr path
 
-Required. The path to the browsermob_proxy binary.
+The path to the browsermob_proxy binary. If you aren't planning to
+call C<start>, this is optional.
 
 =cut
 
 has path => (
     is => 'rw',
-    required => 1
 );
 
 =attr port
 
-Optional. The port on which the proxy server should run. This is not
-the port that you should have other clients connect.
+The port on which the proxy server should run. This is not the port
+that you should have other clients connect.
 
 =cut
 
@@ -81,6 +82,7 @@ any proxies.
 
 sub start {
     my $self = shift;
+    die '"' . $self->path . '" is an invalid path' unless -f $self->path;
 
     defined ($self->_pid(fork)) or die "Error starting server: $!";
     if ($self->_pid) {
@@ -116,7 +118,7 @@ C<create_proxy> to get a proxy that you can use with your tests. No
 proxies actually exist until you call create_proxy; starting the
 server does not create a proxy.
 
-    my $proxy = $bmp->create_proxy(); # returns a Browsermob::Proxy object
+    my $proxy = $bmp->create_proxy; # returns a Browsermob::Proxy object
     my $proxy = $bmp->create_proxy(port => 1337);
 
 =cut
