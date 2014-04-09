@@ -19,7 +19,7 @@ my $bmp = Browsermob::Server->new(
     port => $port
 );
 
-isa_ok($bmp, 'Browsermob::Proxy');
+isa_ok($bmp, 'Browsermob::Server');
 
 $bmp->start;
 ok($p->ping('localhost'), 'server started!');
