@@ -56,22 +56,6 @@ Get a list of ports attached to a ProxyServer managed by ProxyManager
 
     $proxy->get_proxies
 
-=method create
-
-Create a new proxy. This method is automatically invoked upon
-instantiation, so you shouldn't have to call it unless you're doing
-something unexpected. In fact, if you do call it, things will probably
-get messed up.
-
-=method delete_proxy
-
-Shutdown the proxy and close the port. This is automatically invoked
-when the C<$proxy> goes out of scope, so you shouldn't have to call
-this either. In fact, if you do call it, things will probably
-get messed up.
-
-    $proxy->delete_proxy;
-
 =cut
 
 my $spec = {
@@ -121,6 +105,13 @@ my $spec = {
         }
     }
 };
+
+=attr server_port
+
+Required. Indicate at what localhost port we should expect a
+Browsermob Server to be running.
+
+=cut
 
 has server_port => (
     is => 'ro',
@@ -241,10 +232,26 @@ sub DESTROY {
 
 1;
 
+=method create
+
+Create a new proxy. This method is automatically invoked upon
+instantiation, so you shouldn't have to call it unless you're doing
+something unexpected. In fact, if you do call it, things will probably
+get messed up.
+
+=method delete_proxy
+
+Shutdown the proxy and close the port. This is automatically invoked
+when the C<$proxy> goes out of scope, so you shouldn't have to call
+this either. In fact, if you do call it, things will probably
+get messed up.
+
+=cut
+
 =head1 SEE ALSO
 
-* http://bmp.lightbody.net/
-* https://github.com/lightbody/browsermob-proxy
-* Browsermob::Server
+http://bmp.lightbody.net/
+https://github.com/lightbody/browsermob-proxy
+Browsermob::Server
 
 =cut

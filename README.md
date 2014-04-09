@@ -49,6 +49,11 @@ this module to handle the proxies.
 
 # ATTRIBUTES
 
+## server\_port
+
+Required. Indicate at what localhost port we should expect a
+Browsermob Server to be running.
+
 ## port
 
 Optional: When instantiating a proxy, you can choose the proxy port on
@@ -61,22 +66,6 @@ your own, or let it automatically assign you a port for the proxy.
 Get a list of ports attached to a ProxyServer managed by ProxyManager
 
     $proxy->get_proxies
-
-## create
-
-Create a new proxy. This method is automatically invoked upon
-instantiation, so you shouldn't have to call it unless you're doing
-something unexpected. In fact, if you do call it, things will probably
-get messed up.
-
-## delete\_proxy
-
-Shutdown the proxy and close the port. This is automatically invoked
-when the `$proxy` goes out of scope, so you shouldn't have to call
-this either. In fact, if you do call it, things will probably
-get messed up.
-
-    $proxy->delete_proxy;
 
 ## new
 
@@ -97,13 +86,27 @@ also pass a string to choose your own initial page ref.
     $proxy->new_har;
     $proxy->new_har('Google');
 
+## create
+
+Create a new proxy. This method is automatically invoked upon
+instantiation, so you shouldn't have to call it unless you're doing
+something unexpected. In fact, if you do call it, things will probably
+get messed up.
+
+## delete\_proxy
+
+Shutdown the proxy and close the port. This is automatically invoked
+when the `$proxy` goes out of scope, so you shouldn't have to call
+this either. In fact, if you do call it, things will probably
+get messed up.
+
 # SEE ALSO
 
 Please see those modules/websites for more information related to this module.
 
-- [\* http://bmp.lightbody.net/](https://metacpan.org/pod/*&#x20;http:#bmp.lightbody.net)
-- [\* https://github.com/lightbody/browsermob-proxy](https://metacpan.org/pod/*&#x20;https:#github.com-lightbody-browsermob-proxy)
-- [\* Browsermob::Server](https://metacpan.org/pod/*&#x20;Browsermob::Server)
+- [http://bmp.lightbody.net/](http://bmp.lightbody.net/)
+- [https://github.com/lightbody/browsermob-proxy](https://github.com/lightbody/browsermob-proxy)
+- [Browsermob::Server](https://metacpan.org/pod/Browsermob::Server)
 
 # BUGS
 
@@ -117,15 +120,3 @@ feature.
 # AUTHOR
 
 Daniel Gempesaw <gempesaw@gmail.com>
-
-# POD ERRORS
-
-Hey! __The above document had some coding errors, which are explained below:__
-
-- Around line 110:
-
-    alternative text '\* http://bmp.lightbody.net/' contains non-escaped | or /
-
-- Around line 114:
-
-    alternative text '\* https://github.com/lightbody/browsermob-proxy' contains non-escaped | or /
