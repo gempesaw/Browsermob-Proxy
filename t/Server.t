@@ -7,7 +7,7 @@ use Test::LWP::UserAgent;
 use Browsermob::Server;
 use Net::Ping;
 
-my $binary = '/opt/browsermob-proxy-2.0-beta-9/bin/browsermob-proxy';
+my $binary = 'bin/browsermob-proxy';
 plan skip_all => "Skipping server tests; no binary found" unless -f $binary;
 
 my $p = Net::Ping->new();
