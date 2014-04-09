@@ -53,24 +53,22 @@ this module to handle the proxies.
 
 ## server\_port
 
-Required. Indicate at what localhost port we should expect a
-Browsermob Server to be running.
+Required during manual instantiation. Indicate at what localhost port
+we should expect a Browsermob Server to be running.
+
+    my $proxy = Browsermob::Proxy->new(server_port => 8080);
 
 ## port
 
 Optional: When instantiating a proxy, you can choose the proxy port on
 your own, or let it automatically assign you a port for the proxy.
 
+    my $proxy = Browsermob::Proxy->new(
+        server_port => 8080
+        port => 9091
+    );
+
 # METHODS
-
-## new
-
-Instantiate a new proxy. `server_port` is the only required argument
-if you're instantiating this class manually.
-
-    my $proxy = $bmp->create_proxy; # invokes new for you
-
-    my $proxy = BrowserMob::Proxy->new(server_port => 63638);
 
 ## new\_har
 
@@ -90,20 +88,6 @@ HAR, and may in the future return an isntance of [Archive::HAR](https://metacpan
 
     my $har = $proxy->har;
     print Dumper $har->{log}->{entries}->[0];
-
-## create
-
-Create a new proxy. This method is automatically invoked upon
-instantiation, so you shouldn't have to call it unless you're doing
-something unexpected. In fact, if you do call it, things will probably
-get messed up.
-
-## delete\_proxy
-
-Shutdown the proxy and close the port. This is automatically invoked
-when the `$proxy` goes out of scope, so you shouldn't have to call
-this either. In fact, if you do call it, things will probably
-get messed up.
 
 # SEE ALSO
 
