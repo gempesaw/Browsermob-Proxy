@@ -7,6 +7,8 @@ use JSON;
 use Net::HTTP::Spore;
 use Net::HTTP::Spore::Middleware::DefaultParams;
 
+=for markdown [![Build Status](https://travis-ci.org/gempesaw/Browsermob-Proxy.svg?branch=master)](https://travis-ci.org/gempesaw/Browsermob-Proxy)
+
 =head1 SYNOPSIS
 
 Standalone:

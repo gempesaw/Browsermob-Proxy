@@ -2,6 +2,8 @@
 
 Browsermob::Proxy - Perl client for the proxies created by the Browsermob server
 
+[![Build Status](https://travis-ci.org/gempesaw/Browsermob-Proxy.svg?branch=master)](https://travis-ci.org/gempesaw/Browsermob-Proxy)
+
 # VERSION
 
 version 0.01
