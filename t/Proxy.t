@@ -82,7 +82,7 @@ HAR: {
         $har_server->{'/proxy/' . $port . '/har'} = sub {
             my $req = shift;
             ok($req->method eq 'GET', 'retrieving a har via GET');
-            $req->new_response(200, ['Content-Type' => 'application/json'], '{"sample": "har"}');
+            $req->new_response(200, ['Content-Type' => 'application/json'], fake_har());
         };
 
         my $proxy = Browsermob::Proxy->new(
@@ -91,8 +91,10 @@ HAR: {
             mock => $har_server
         );
 
-        my $res = $proxy->har;
-        isa_ok($res->body, 'HASH', 'the retrieved har is a hash');
+        my $har = $proxy->har;
+        isa_ok($har, 'HASH', 'the retrieved har is a hash');
+        ok(exists $har->{log}, 'with a log entry');
+        ok(exists $har->{log}->{entries}->[0], 'that has an entries arrayref');
     }
 }
 
@@ -125,6 +127,10 @@ sub generate_mock_server {
             }
         }
     }
+}
+
+sub fake_har {
+    return '{"log":{"creator":{"comment":"","version":"2.0","name":"BrowserMob Proxy"},"comment":"","version":"1.2","entries":[{"request":{"bodySize":0,"cookies":[],"headers":[],"httpVersion":"HTTP","headersSize":102,"comment":"","url":"http://www.google.com/","method":"GET","queryString":[]},"timings":{"dns":97,"send":0,"ssl":0,"receive":8,"comment":"","wait":117,"blocked":0,"connect":43},"pageref":"Page 1","response":{"bodySize":11467,"cookies":[{"domain":".google.com","comment":"","value":"ID=9b9fccc5e3179766:FF=0:TM=1397078322:LM=1397078322:S=zNU0CgkD_fCR3d_h","name":"PREF","path":"/","expires":"2016-04-08T21:18:42.000+0000"},{"domain":".google.com","comment":"","value":"67=Jt7rVJxnccsjaJQ2cTzu2gMrUQvY4ncdIKiO6bemm51SiBU2u3QVBtQGJA5PB5_dVXti1BAnbaVqQoJLzBsacjeLi8-YAhBGuwsj4K0gwA1aNsDOxvvR0nEwsCGrxWK_","name":"NID","path":"/","expires":"2014-10-09T21:18:42.000+0000"}],"headers":[],"status":200,"httpVersion":"HTTP","content":{"comment":"","mimeType":"text/html; charset=ISO-8859-1","size":11467},"statusText":"OK","headersSize":793,"comment":"","redirectURL":""},"time":265,"startedDateTime":"2014-04-09T21:18:44.512+0000","serverIPAddress":"74.125.225.50","comment":"","cache":{}}],"browser":{"comment":"","version":"7.30.0","name":"cURL"},"pages":[{"comment":"","title":"","pageTimings":{"comment":""},"id":"Page 1","startedDateTime":"2014-04-09T21:18:44.503+0000"}]}}'
 }
 
 done_testing;

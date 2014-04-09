@@ -20,7 +20,7 @@ Standalone:
     print $proxy->port;
     $proxy->new_har('Google');
     # create network traffic across your port
-    $proxy->har; # returns a HAR as a JSON blob
+    $proxy->har; # returns a HAR as a hashref, converted from JSON
 
 with [Browsermob::Server](https://metacpan.org/pod/Browsermob::Server):
 
@@ -63,12 +63,6 @@ your own, or let it automatically assign you a port for the proxy.
 
 # METHODS
 
-## get\_ports
-
-Get a list of ports attached to a ProxyServer managed by ProxyManager
-
-    $proxy->get_proxies
-
 ## new
 
 Instantiate a new proxy. `server_port` is the only required argument
@@ -87,6 +81,15 @@ also pass a string to choose your own initial page ref.
 
     $proxy->new_har;
     $proxy->new_har('Google');
+
+## har
+
+After creating a proxy and initiating a `new_har`, you can retrieve
+the contents of the current HAR with this method. It returns a hashref
+HAR, and may in the future return an isntance of [Archive::HAR](https://metacpan.org/pod/Archive::HAR).
+
+    my $har = $proxy->har;
+    print Dumper $har->{log}->{entries}->[0];
 
 ## create
 

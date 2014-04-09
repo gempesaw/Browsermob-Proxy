@@ -21,7 +21,7 @@ Standalone:
     print $proxy->port;
     $proxy->new_har('Google');
     # create network traffic across your port
-    $proxy->har; # returns a HAR as a JSON blob
+    $proxy->har; # returns a HAR as a hashref, converted from JSON
 
 with L<Browsermob::Server>:
 
@@ -49,14 +49,6 @@ This module is a Perl client interface to interact with the server and
 its proxies. It uses L<Net::HTTP::Spore>. You can use
 L<Browsermob::Server> to manage the server itself in addition to using
 this module to handle the proxies.
-
-=cut
-
-=method get_ports
-
-Get a list of ports attached to a ProxyServer managed by ProxyManager
-
-    $proxy->get_proxies
 
 =cut
 
@@ -100,7 +92,7 @@ my $spec = {
             ],
             description => 'creates a new HAR attached to the proxy and returns the HAR content if there was a previous HAR.'
         },
-        har => {
+        retrieve_har => {
             method => 'GET',
             path => '/:port/har',
             description => 'returns the JSON/HAR content representing all the HTTP traffic passed through the proxy'
@@ -226,6 +218,23 @@ sub new_har {
     $self->_spore->create_new_har(payload => $payload);
 }
 
+=method har
+
+After creating a proxy and initiating a C<new_har>, you can retrieve
+the contents of the current HAR with this method. It returns a hashref
+HAR, and may in the future return an isntance of L<Archive::HAR>.
+
+    my $har = $proxy->har;
+    print Dumper $har->{log}->{entries}->[0];
+
+=cut
+
+sub har {
+    my ($self) = @_;
+
+    croak "You need to create a proxy first!" unless $self->has_port;
+    return $self->_spore->retrieve_har->body;
+}
 
 sub DESTROY {
     my $self = shift;
