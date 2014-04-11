@@ -259,6 +259,26 @@ sub har {
     return $self->_spore->retrieve_har->body;
 }
 
+=method selenium_proxy
+
+Generate the proper capabilities for use in the constructor of a new
+Selenium::Remote::Driver object.
+
+    my $proxy = Browsermob::Proxy->new( server_port => 63638 );
+    my $driver = Selenium::Remote::Driver->new( proxy => $proxy->selenium_proxy );
+
+=cut
+
+sub selenium_proxy {
+    my ($self) = @_;
+
+    return {
+        proxyType => 'manual',
+        httpProxy => 'http://' . $self->server_addr . ':' . $self->port,
+        sslProxy => 'http://' . $self->server_addr . ':' . $self->port
+    };
+}
+
 sub DESTROY {
     my $self = shift;
     $self->delete_proxy;

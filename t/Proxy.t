@@ -98,6 +98,28 @@ HAR: {
     }
 }
 
+CAPABILITIES: {
+    my $proxy = Browsermob::Proxy->new(
+        server_port => $server_port,
+        port => $port,
+        mock => generate_mock_server()
+    );
+
+    my $caps = $proxy->selenium_proxy;
+    isa_ok($caps, 'HASH', 'caps is a hashref');
+    ok($caps->{proxyType} eq 'manual', 'and has a proxyType');
+    ok($caps->{httpProxy} =~ /$port/i, 'and a httpUrl proxyType to the correct port');
+
+    my $addr = $proxy->server_addr;
+    cmp_ok($caps->{httpProxy}, '=~', qr/$addr/i, 'and the correct server addr');
+
+    ok($caps->{sslProxy} =~ /$port/i, 'and a httpUrl proxyType to the correct port in SSL');
+
+    my $addr = $proxy->server_addr;
+    cmp_ok($caps->{sslProxy}, '=~', qr/$addr/i, 'and the correct server addr in SSL');
+
+}
+
 sub generate_mock_server {
     my $mock_port = shift || $port;
 
