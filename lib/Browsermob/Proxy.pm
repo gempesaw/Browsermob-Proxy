@@ -133,6 +133,21 @@ has port => (
     default => sub { '' }
 );
 
+=attr trace
+
+Set Net::HTTP::Spore's trace option; defaults to 0; set it to 1 to see
+headers and 2 to see headers and responses. This can only be set during
+construction.
+
+    my $proxy = Browsermob::Proxy->new( trace => 2 );
+
+=cut
+
+has trace => (
+    is => 'ro',
+    default => sub { 0 }
+);
+
 has mock => (
     is => 'rw',
     lazy => 1,
@@ -147,7 +162,7 @@ has _spore => (
         my $self = shift;
         my $client = Net::HTTP::Spore->new_from_string(
             to_json($self->_spec),
-            # trace => 1
+            trace => $self->trace
         );
         $client->enable('Format::JSON');
 
