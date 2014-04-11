@@ -6,6 +6,7 @@ use Test::More;
 use JSON;
 use LWP::UserAgent;
 use Browsermob::Proxy;
+use Net::HTTP::Spore::Middleware::Mock;
 
 my $server_port = 63638;
 my $port = 9091;
@@ -115,9 +116,8 @@ CAPABILITIES: {
 
     ok($caps->{sslProxy} =~ /$port/i, 'and a httpUrl proxyType to the correct port in SSL');
 
-    my $addr = $proxy->server_addr;
+    $addr = $proxy->server_addr;
     cmp_ok($caps->{sslProxy}, '=~', qr/$addr/i, 'and the correct server addr in SSL');
-
 }
 
 sub generate_mock_server {
