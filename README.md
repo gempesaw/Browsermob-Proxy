@@ -72,6 +72,14 @@ your own, or let it automatically assign you a port for the proxy.
         port => 9091
     );
 
+## trace
+
+Set Net::HTTP::Spore's trace option; defaults to 0; set it to 1 to see
+headers and 2 to see headers and responses. This can only be set during
+construction.
+
+    my $proxy = Browsermob::Proxy->new( trace => 2 );
+
 # METHODS
 
 ## new\_har
@@ -93,13 +101,13 @@ HAR, and may in the future return an isntance of [Archive::HAR](https://metacpan
     my $har = $proxy->har;
     print Dumper $har->{log}->{entries}->[0];
 
-## caps
+## selenium\_proxy
 
 Generate the proper capabilities for use in the constructor of a new
 Selenium::Remote::Driver object.
 
     my $proxy = Browsermob::Proxy->new( server_port => 63638 );
-    my $driver = Selenium::Remote::Driver->new( proxy => $proxy->caps );
+    my $driver = Selenium::Remote::Driver->new( proxy => $proxy->selenium_proxy );
 
 # SEE ALSO
 
