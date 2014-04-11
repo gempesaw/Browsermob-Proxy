@@ -6,7 +6,7 @@ Browsermob::Proxy - Perl client for the proxies created by the Browsermob server
 
 # VERSION
 
-version 0.02
+version 0.03
 
 # SYNOPSIS
 
@@ -51,10 +51,14 @@ this module to handle the proxies.
 
 # ATTRIBUTES
 
+## server\_addr
+
+Optional: specify where the proxy server is; defaults to 127.0.0.1
+
 ## server\_port
 
-Required during manual instantiation. Indicate at what localhost port
-we should expect a Browsermob Server to be running.
+Optional: Indicate at what port we should expect a Browsermob Server
+to be running; defaults to 8080
 
     my $proxy = Browsermob::Proxy->new(server_port => 8080);
 
@@ -88,6 +92,14 @@ HAR, and may in the future return an isntance of [Archive::HAR](https://metacpan
 
     my $har = $proxy->har;
     print Dumper $har->{log}->{entries}->[0];
+
+## caps
+
+Generate the proper capabilities for use in the constructor of a new
+Selenium::Remote::Driver object.
+
+    my $proxy = Browsermob::Proxy->new( server_port => 63638 );
+    my $driver = Selenium::Remote::Driver->new( proxy => $proxy->caps );
 
 # SEE ALSO
 
