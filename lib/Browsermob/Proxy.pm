@@ -100,18 +100,30 @@ my $spec = {
     }
 };
 
+=attr server_addr
+
+Optional: specify where the proxy server is; defaults to 127.0.0.1
+
+=cut
+
+has server_addr => (
+    is => 'rw',
+    default => sub { '127.0.0.1' }
+);
+
+
 =attr server_port
 
-Required during manual instantiation. Indicate at what localhost port
-we should expect a Browsermob Server to be running.
+Optional: Indicate at what port we should expect a Browsermob Server
+to be running; defaults to 8080
 
     my $proxy = Browsermob::Proxy->new(server_port => 8080);
 
 =cut
 
 has server_port => (
-    is => 'ro',
-    required => 1
+    is => 'rw',
+    default => sub { 8080 }
 );
 
 =attr port
@@ -188,7 +200,7 @@ has _spec => (
     lazy => 1,
     builder => sub {
         my $self = shift;
-        $spec->{base_url} = 'http://127.0.0.1:' . $self->server_port . '/proxy';
+        $spec->{base_url} = 'http://' . $self->server_addr . ':' . $self->server_port . '/proxy';
         return $spec;
     }
 );
