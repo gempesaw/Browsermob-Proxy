@@ -192,7 +192,7 @@ has _spore => (
 
         return $client;
     },
-    handles => [keys $spec->{methods}]
+    handles => [keys %{ $spec->{methods} }]
 );
 
 has _spec => (
