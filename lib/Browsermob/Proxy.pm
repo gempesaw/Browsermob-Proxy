@@ -35,15 +35,20 @@ with L<Browsermob::Server>:
 
 =head1 DESCRIPTION
 
-From L<http://bmp.lightbody.net/>: BrowserMob proxy is based on
-technology developed in the Selenium open source project and a
-commercial load testing and monitoring service originally called
-BrowserMob and now part of Neustar.
+From L<http://bmp.lightbody.net/>:
+
+=over 4
+
+BrowserMob proxy is based on technology developed in the Selenium open
+source project and a commercial load testing and monitoring service
+originally called BrowserMob and now part of Neustar.
 
 It can capture performance data for web apps (via the HAR format), as
 well as manipulate browser behavior and traffic, such as whitelisting
 and blacklisting content, simulating network traffic and latency, and
 rewriting HTTP requests and responses.
+
+=back
 
 This module is a Perl client interface to interact with the server and
 its proxies. It uses L<Net::HTTP::Spore>. You can use
@@ -56,6 +61,8 @@ my $spec = {
     name => 'BrowserMob Proxy',
     formats => ['json'],
     version => '0.01',
+    # server name and port are constructed in the _spore builder
+    # base_url => '/proxy',
     methods => {
         get_proxies => {
             method => 'GET',

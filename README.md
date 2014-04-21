@@ -34,15 +34,16 @@ with [Browsermob::Server](https://metacpan.org/pod/Browsermob::Server):
 
 # DESCRIPTION
 
-From [http://bmp.lightbody.net/](http://bmp.lightbody.net/): BrowserMob proxy is based on
-technology developed in the Selenium open source project and a
-commercial load testing and monitoring service originally called
-BrowserMob and now part of Neustar.
+From [http://bmp.lightbody.net/](http://bmp.lightbody.net/):
 
-It can capture performance data for web apps (via the HAR format), as
-well as manipulate browser behavior and traffic, such as whitelisting
-and blacklisting content, simulating network traffic and latency, and
-rewriting HTTP requests and responses.
+> BrowserMob proxy is based on technology developed in the Selenium open
+> source project and a commercial load testing and monitoring service
+> originally called BrowserMob and now part of Neustar.
+>
+> It can capture performance data for web apps (via the HAR format), as
+> well as manipulate browser behavior and traffic, such as whitelisting
+> and blacklisting content, simulating network traffic and latency, and
+> rewriting HTTP requests and responses.
 
 This module is a Perl client interface to interact with the server and
 its proxies. It uses [Net::HTTP::Spore](https://metacpan.org/pod/Net::HTTP::Spore). You can use
