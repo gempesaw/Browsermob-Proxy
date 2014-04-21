@@ -26,7 +26,7 @@ Standalone:
 with L<Browsermob::Server>:
 
     my $server = Browsermob::Server->new(
-        server_port = 9090
+        server_port => 9090
     );
     $server->start; # ignore if your server is already running
 
