@@ -269,18 +269,28 @@ sub har {
 =method selenium_proxy
 
 Generate the proper capabilities for use in the constructor of a new
-Selenium::Remote::Driver object. If you pass it something truthy,
-C<selenium_proxy> will also call L</new_har> for you automatically,
-initiating an unnamed har.
+Selenium::Remote::Driver object.
 
     my $proxy = Browsermob::Proxy->new( server_port => 63638 );
     my $driver = Selenium::Remote::Driver->new( proxy => $proxy->selenium_proxy(1) );
+    $driver->get('http://www.google.com');
+    print Dumper $proxy->har;
+
+C<selenium_proxy> will also call L</new_har> for you automatically,
+initiating an unnamed har, unless you pass it something truthy.
+
+    my $proxy = Browsermob::Proxy->new( server_port => 63638 );
+    my $driver = Selenium::Remote::Driver->new( proxy => $proxy->selenium_proxy(1) );
+    # later
+    $proxy->new_har;
+
+
 
 =cut
 
 sub selenium_proxy {
-    my ($self, $begin_new_har) = @_;
-    $self->new_har if $begin_new_har;
+    my ($self, $user_will_initiate_har_manually) = @_;
+    $self->new_har unless $user_will_initiate_har_manually;
 
     return {
         proxyType => 'manual',

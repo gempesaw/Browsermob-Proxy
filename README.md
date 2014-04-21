@@ -105,10 +105,12 @@ HAR, and may in the future return an isntance of [Archive::HAR](https://metacpan
 ## selenium\_proxy
 
 Generate the proper capabilities for use in the constructor of a new
-Selenium::Remote::Driver object.
+Selenium::Remote::Driver object. If you pass it something truthy,
+`selenium_proxy` will also call ["new\_har"](#new_har) for you automatically,
+initiating an unnamed har.
 
     my $proxy = Browsermob::Proxy->new( server_port => 63638 );
-    my $driver = Selenium::Remote::Driver->new( proxy => $proxy->selenium_proxy );
+    my $driver = Selenium::Remote::Driver->new( proxy => $proxy->selenium_proxy(1) );
 
 # SEE ALSO
 
