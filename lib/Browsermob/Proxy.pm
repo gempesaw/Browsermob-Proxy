@@ -272,7 +272,7 @@ Generate the proper capabilities for use in the constructor of a new
 Selenium::Remote::Driver object.
 
     my $proxy = Browsermob::Proxy->new( server_port => 63638 );
-    my $driver = Selenium::Remote::Driver->new( proxy => $proxy->selenium_proxy(1) );
+    my $driver = Selenium::Remote::Driver->new( proxy => $proxy->selenium_proxy );
     $driver->get('http://www.google.com');
     print Dumper $proxy->har;
 
@@ -283,8 +283,8 @@ initiating an unnamed har, unless you pass it something truthy.
     my $driver = Selenium::Remote::Driver->new( proxy => $proxy->selenium_proxy(1) );
     # later
     $proxy->new_har;
-
-
+    $driver->get('http://www.google.com');
+    print Dumper $proxy->har;
 
 =cut
 
