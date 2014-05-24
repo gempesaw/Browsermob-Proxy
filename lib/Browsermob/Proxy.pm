@@ -341,7 +341,7 @@ sub ua_proxy {
 
 Set up automatic Basic authentication for a specified domain. Accepts
 as input a HASHREF with the keys C<domain>, C<username>, and
-C<password. For example,
+C<password>. For example,
 
     $proxy->add_basic_auth({
         domain => '.google.com',

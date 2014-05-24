@@ -143,7 +143,7 @@ initialize the har yourself, pass in something truthy.
 
 Set up automatic Basic authentication for a specified domain. Accepts
 as input a HASHREF with the keys `domain`, `username`, and
-`password. For example,`
+`password`. For example,
 
     $proxy->add_basic_auth({
         domain => '.google.com',
@@ -171,11 +171,3 @@ feature.
 # AUTHOR
 
 Daniel Gempesaw <gempesaw@gmail.com>
-
-# POD ERRORS
-
-Hey! __The above document had some coding errors, which are explained below:__
-
-- Around line 152:
-
-    Unterminated C<...> sequence
