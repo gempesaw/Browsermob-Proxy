@@ -177,17 +177,25 @@ BASIC_AUTH: {
   INTEGRATION: {
       SKIP: {
             use Net::Ping;
-            use LWP::UserAgent;
             my $p = Net::Ping->new('tcp', 1);
             skip 'cannot reach webdav.org', 1 unless $p->ping('test.webdav.org');
 
-            my $proxy = Browsermob::Proxy->new;
+            my $proxy;
+            try {
+                $proxy = Browsermob::Proxy->new;
+            }
+            catch {
+                print $_ . "\n";
+            };
+            skip 'no server running', 1 unless defined $proxy;
+
             $proxy->add_basic_auth({
                 domain => '.webdav.org',
                 username => 'user1',
                 password => 'user1'
             });
 
+            use LWP::UserAgent;
             my $ua = LWP::UserAgent->new;
             $ua->proxy($proxy->ua_proxy);
             my $res = $ua->get('http://test.webdav.org/auth-basic/');
