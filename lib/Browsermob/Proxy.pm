@@ -285,7 +285,7 @@ Selenium::Remote::Driver object.
 
     my $proxy = Browsermob::Proxy->new;
     my $driver = Selenium::Remote::Driver->new(
-        browser_name => 'chrome'
+        browser_name => 'chrome',
         proxy        => $proxy->selenium_proxy
     );
     $driver->get('http://www.google.com');
@@ -296,7 +296,7 @@ initiating an unnamed har, unless you pass it something truthy.
 
     my $proxy = Browsermob::Proxy->new;
     my $driver = Selenium::Remote::Driver->new(
-        browser_name => 'chrome'
+        browser_name => 'chrome',
         proxy        => $proxy->selenium_proxy(1)
     );
     # later
