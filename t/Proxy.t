@@ -181,7 +181,6 @@ BASIC_AUTH: {
             my $p = Net::Ping->new('tcp', 1);
             skip 'cannot reach webdav.org', 1 unless $p->ping('test.webdav.org');
 
-
             my $proxy = Browsermob::Proxy->new;
             $proxy->add_basic_auth({
                 domain => '.webdav.org',
@@ -190,7 +189,7 @@ BASIC_AUTH: {
             });
 
             my $ua = LWP::UserAgent->new;
-            $ua->proxy('http', 'http://localhost:' . $proxy->port . '/');
+            $ua->proxy($proxy->ua_proxy);
             my $res = $ua->get('http://test.webdav.org/auth-basic/');
             ok($res->code eq 404 && $res->code ne 401, 'the proxy authorizes us into webdav.org');
         }

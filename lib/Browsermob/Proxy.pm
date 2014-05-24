@@ -283,7 +283,7 @@ sub har {
 Generate the proper capabilities for use in the constructor of a new
 Selenium::Remote::Driver object.
 
-    my $proxy = Browsermob::Proxy->new( server_port => 63638 );
+    my $proxy = Browsermob::Proxy->new;
     my $driver = Selenium::Remote::Driver->new(
         browser_name => 'chrome'
         proxy        => $proxy->selenium_proxy
@@ -294,7 +294,7 @@ Selenium::Remote::Driver object.
 N.B.: C<selenium_proxy> will AUTOMATICALLY call L</new_har> for you
 initiating an unnamed har, unless you pass it something truthy.
 
-    my $proxy = Browsermob::Proxy->new( server_port => 63638 );
+    my $proxy = Browsermob::Proxy->new;
     my $driver = Selenium::Remote::Driver->new(
         browser_name => 'chrome'
         proxy        => $proxy->selenium_proxy(1)
@@ -307,14 +307,34 @@ initiating an unnamed har, unless you pass it something truthy.
 =cut
 
 sub selenium_proxy {
-    my ($self, $user_will_initiate_har_manually) = @_;
-    $self->new_har unless $user_will_initiate_har_manually;
+    my ($self, $initiate_manually) = @_;
+    $self->new_har unless $initiate_manually;
 
     return {
         proxyType => 'manual',
         httpProxy => 'http://' . $self->server_addr . ':' . $self->port,
         sslProxy => 'http://' . $self->server_addr . ':' . $self->port
     };
+}
+
+=method ua_proxy
+
+Generate the proper arguments for the proxy method of
+L<LWP::UserAgent>. By default, C<ua_proxy> will initiate a new har for
+you automatically, the same as L</selenium_proxy> does. If you want to
+initialize the har yourself, pass in something truthy.
+
+    my $proxy = Browsermob::Proxy->new;
+    my $ua = LWP::UserAgent->new;
+    $ua->proxy($proxy->ua_proxy);
+
+=cut
+
+sub ua_proxy {
+    my ($self, $initiate_manually) = @_;
+    $self->new_har unless $initiate_manually;
+
+    return ('http', 'http://' . $self->server_addr . ':' . $self->port);
 }
 
 =method add_basic_auth
@@ -324,12 +344,10 @@ as input a HASHREF with the keys C<domain>, C<username>, and
 C<password. For example,
 
     $proxy->add_basic_auth({
-        domain => 'google.com',
+        domain => '.google.com',
         username => 'username',
         password => 'password'
     });
-    $ua->proxy($proxy->ua_proxy);
-    $ua->get('google.com'); # will add authentication to this request
 
 =cut
 
@@ -346,7 +364,6 @@ sub add_basic_auth {
     );
 
 }
-
 
 sub DESTROY {
     my $self = shift;
