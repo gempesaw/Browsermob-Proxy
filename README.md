@@ -6,7 +6,7 @@ Browsermob::Proxy - Perl client for the proxies created by the Browsermob server
 
 # VERSION
 
-version 0.04
+version 0.05
 
 # SYNOPSIS
 
@@ -25,7 +25,7 @@ Standalone:
 with [Browsermob::Server](https://metacpan.org/pod/Browsermob::Server):
 
     my $server = Browsermob::Server->new(
-        server_port = 9090
+        server_port => 9090
     );
     $server->start; # ignore if your server is already running
 
@@ -107,20 +107,49 @@ HAR, and may in the future return an isntance of [Archive::HAR](https://metacpan
 Generate the proper capabilities for use in the constructor of a new
 Selenium::Remote::Driver object.
 
-    my $proxy = Browsermob::Proxy->new( server_port => 63638 );
-    my $driver = Selenium::Remote::Driver->new( proxy => $proxy->selenium_proxy );
+    my $proxy = Browsermob::Proxy->new;
+    my $driver = Selenium::Remote::Driver->new(
+        browser_name => 'chrome'
+        proxy        => $proxy->selenium_proxy
+    );
     $driver->get('http://www.google.com');
     print Dumper $proxy->har;
 
-`selenium_proxy` will also call ["new\_har"](#new_har) for you automatically,
+N.B.: `selenium_proxy` will AUTOMATICALLY call ["new\_har"](#new_har) for you
 initiating an unnamed har, unless you pass it something truthy.
 
-    my $proxy = Browsermob::Proxy->new( server_port => 63638 );
-    my $driver = Selenium::Remote::Driver->new( proxy => $proxy->selenium_proxy(1) );
+    my $proxy = Browsermob::Proxy->new;
+    my $driver = Selenium::Remote::Driver->new(
+        browser_name => 'chrome'
+        proxy        => $proxy->selenium_proxy(1)
+    );
     # later
     $proxy->new_har;
     $driver->get('http://www.google.com');
     print Dumper $proxy->har;
+
+## ua\_proxy
+
+Generate the proper arguments for the proxy method of
+[LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent). By default, `ua_proxy` will initiate a new har for
+you automatically, the same as ["selenium\_proxy"](#selenium_proxy) does. If you want to
+initialize the har yourself, pass in something truthy.
+
+    my $proxy = Browsermob::Proxy->new;
+    my $ua = LWP::UserAgent->new;
+    $ua->proxy($proxy->ua_proxy);
+
+## add\_basic\_auth
+
+Set up automatic Basic authentication for a specified domain. Accepts
+as input a HASHREF with the keys `domain`, `username`, and
+`password. For example,`
+
+    $proxy->add_basic_auth({
+        domain => '.google.com',
+        username => 'username',
+        password => 'password'
+    });
 
 # SEE ALSO
 
@@ -142,3 +171,11 @@ feature.
 # AUTHOR
 
 Daniel Gempesaw <gempesaw@gmail.com>
+
+# POD ERRORS
+
+Hey! __The above document had some coding errors, which are explained below:__
+
+- Around line 152:
+
+    Unterminated C<...> sequence
