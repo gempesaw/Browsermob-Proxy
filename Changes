@@ -1,0 +1,16 @@
+Revision history for perl module Browsermob::Proxy
+
+0.05 2014-05-24
+ - Implement basic auth endpoint
+
+0.04 2014-04-21
+ - selenium_proxy method automatically invokes new_har unless passed a truthy value
+
+0.03 2014-04-11
+ - Added selenium_proxy method to pass to Selenium::Remote::Driver
+
+0.02 2014-04-09
+ - `har` method now returns a json of the HAR instead of a ::Spore::Response
+
+0.01 2014-04-03
+ - Initial commit
