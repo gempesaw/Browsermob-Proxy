@@ -1,5 +1,8 @@
 Revision history for perl module Browsermob::Proxy
 
+0.05 2014-05-24
+ - Implement basic auth endpoint
+
 0.04 2014-04-21
  - selenium_proxy method automatically invokes new_har unless passed a truthy value
 
