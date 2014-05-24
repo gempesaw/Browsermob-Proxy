@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 use Test::More;
+use Try::Tiny;
 use JSON;
-use LWP::UserAgent;
 use Browsermob::Proxy;
 use Net::HTTP::Spore::Middleware::Mock;
 
@@ -137,6 +137,63 @@ CAPABILITIES: {
         )->selenium_proxy;
 
         ok($new_har_was_called, 'invoking selenium_proxy creates a new har by default');
+    }
+}
+
+BASIC_AUTH: {
+  UNIT: {
+        my $mock_server = generate_mock_server();
+
+        $mock_server->{'/proxy/' . $port . '/auth/basic/.google.com'} = sub {
+            my $req = shift;
+            my $body = from_json($req->body);
+            ok($body->{username} eq 'bmp', 'user is included in payload');
+            ok($body->{password} eq 'pass', 'pass is included in payload');
+            return $req->new_response(200, ['Content-Type' => 'application/json'], "");
+        };
+
+        my $proxy = Browsermob::Proxy->new(
+            server_port => $server_port,
+            port => $port,
+            mock => $mock_server
+        );
+
+        try {
+            $proxy->add_basic_auth({
+                username => 'missing keys'
+            });
+        }
+        catch {
+            ok($_ =~ /required parameter/, 'basic auth checks for required parameters');
+        };
+
+        $proxy->add_basic_auth({
+            domain => '.google.com',
+            username => 'bmp',
+            password => 'pass'
+        });
+    }
+
+  INTEGRATION: {
+      SKIP: {
+            use Net::Ping;
+            use LWP::UserAgent;
+            my $p = Net::Ping->new('tcp', 1);
+            skip 'cannot reach webdav.org', 1 unless $p->ping('test.webdav.org');
+
+
+            my $proxy = Browsermob::Proxy->new;
+            $proxy->add_basic_auth({
+                domain => '.webdav.org',
+                username => 'user1',
+                password => 'user1'
+            });
+
+            my $ua = LWP::UserAgent->new;
+            $ua->proxy('http', 'http://localhost:' . $proxy->port . '/');
+            my $res = $ua->get('http://test.webdav.org/auth-basic/');
+            ok($res->code eq 404 && $res->code ne 401, 'the proxy authorizes us into webdav.org');
+        }
     }
 }
 

@@ -102,7 +102,19 @@ my $spec = {
         retrieve_har => {
             method => 'GET',
             path => '/:port/har',
+            required_params => [
+                'port'
+            ],
             description => 'returns the JSON/HAR content representing all the HTTP traffic passed through the proxy'
+        },
+        auth_basic => {
+            method => 'POST',
+            path => '/:port/auth/basic/:domain',
+            required_params => [
+                'port',
+                'domain'
+            ],
+            description => 'Sets automatic basic authentication for the specified domain'
         }
     }
 };
@@ -304,6 +316,37 @@ sub selenium_proxy {
         sslProxy => 'http://' . $self->server_addr . ':' . $self->port
     };
 }
+
+=method add_basic_auth
+
+Set up automatic Basic authentication for a specified domain. Accepts
+as input a HASHREF with the keys C<domain>, C<username>, and
+C<password. For example,
+
+    $proxy->add_basic_auth({
+        domain => 'google.com',
+        username => 'username',
+        password => 'password'
+    });
+    $ua->proxy($proxy->ua_proxy);
+    $ua->get('google.com'); # will add authentication to this request
+
+=cut
+
+sub add_basic_auth {
+    my ($self, $args) = @_;
+    foreach (qw/domain username password/) {
+        croak "$_ is a required parameter for add_basic_auth"
+        unless exists $args->{$_};
+    }
+
+    $self->auth_basic(
+        domain => delete $args->{domain},
+        payload => $args
+    );
+
+}
+
 
 sub DESTROY {
     my $self = shift;
