@@ -47,6 +47,18 @@ has path => (
     is => 'rw',
 );
 
+=attr server_addr
+
+The address of the remote server where the Browsermob Proxy server is
+running. This defaults to localhost.
+
+=cut
+
+has server_addr => (
+    is => 'rw',
+    default => sub { 'localhost' }
+);
+
 =attr port
 
 The port on which the proxy server should run. This is not the port
@@ -140,7 +152,7 @@ sub get_proxies {
     my $self = shift;
     my $ua = shift || LWP::UserAgent->new;
 
-    my $res = $ua->get('http://localhost:' . $self->server_port . '/proxy');
+    my $res = $ua->get('http://' . $self->server_addr . ':' . $self->server_port . '/proxy');
     if ($res->is_success) {
         return from_json($res->decoded_content);
     }
@@ -155,7 +167,7 @@ sub _is_listening {
 
     while (!defined $sock && $count++ < $limit) {
         $sock = IO::Socket::INET->new(
-            PeerAddr => 'localhost',
+            PeerAddr => $self->server_addr,
             PeerPort => $self->server_port,
         );
         select(undef, undef, undef, 0.5);
