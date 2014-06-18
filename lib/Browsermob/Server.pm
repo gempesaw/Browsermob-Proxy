@@ -1,5 +1,5 @@
 package Browsermob::Server;
-$Browsermob::Server::VERSION = '0.06';
+$Browsermob::Server::VERSION = '0.07';
 # ABSTRACT: Perl client to control the Browsermob Proxy server
 use strict;
 use warnings;
@@ -72,6 +72,7 @@ sub create_proxy {
     my ($self, %args) = @_;
 
     my $proxy = Browsermob::Proxy->new(
+        server_addr => $self->server_addr,
         server_port => $self->server_port,
         %args
     );
@@ -146,7 +147,7 @@ Browsermob::Server - Perl client to control the Browsermob Proxy server
 
 =head1 VERSION
 
-version 0.06
+version 0.07
 
 =head1 SYNOPSIS
 
@@ -223,7 +224,8 @@ Get a list of currently registered proxies.
 
 =head2 find_open_port
 
-Given a range of valid ports, finds the lowest unused port.
+Given a range of valid ports, finds the lowest unused port by
+searching the proxyList.
 
     my $unused_port = $bmp->find_open_port;
     my $proxy = $bmp->create_proxy(port => $unused_port);
