@@ -140,6 +140,7 @@ sub create_proxy {
     my ($self, %args) = @_;
 
     my $proxy = Browsermob::Proxy->new(
+        server_addr => $self->server_addr,
         server_port => $self->server_port,
         %args
     );
@@ -175,7 +176,8 @@ sub get_proxies {
 
 =method find_open_port
 
-Given a range of valid ports, finds the lowest unused port.
+Given a range of valid ports, finds the lowest unused port by
+searching the proxyList.
 
     my $unused_port = $bmp->find_open_port;
     my $proxy = $bmp->create_proxy(port => $unused_port);
