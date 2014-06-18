@@ -1,5 +1,5 @@
 package Browsermob::Server;
-$Browsermob::Server::VERSION = '0.05';
+$Browsermob::Server::VERSION = '0.06';
 # ABSTRACT: Perl client to control the Browsermob Proxy server
 use strict;
 use warnings;
@@ -16,6 +16,12 @@ has path => (
 );
 
 
+has server_addr => (
+    is => 'rw',
+    default => sub { 'localhost' }
+);
+
+
 has server_port => (
     is => 'rw',
     init_arg => 'port',
@@ -26,6 +32,14 @@ has _pid => (
     is => 'rw',
     init_arg => undef,
     default => sub { '' }
+);
+
+has ua => (
+    is => 'rw',
+    lazy => 1,
+    default => sub {
+        return LWP::UserAgent->new;
+    }
 );
 
 
@@ -68,11 +82,35 @@ sub create_proxy {
 
 sub get_proxies {
     my $self = shift;
-    my $ua = shift || LWP::UserAgent->new;
+    my $ua = $self->ua;
 
-    my $res = $ua->get('http://localhost:' . $self->server_port . '/proxy');
+    my $res = $ua->get('http://' . $self->server_addr . ':' . $self->server_port . '/proxy');
     if ($res->is_success) {
-        return from_json($res->decoded_content);
+        my $list = from_json($res->decoded_content)->{proxyList};
+
+        my @proxies = map {
+            $_->{port};
+        } @$list;
+
+        return \@proxies;
+    }
+
+}
+
+
+sub find_open_port {
+    my ($self, @range) = @_;
+    my $proxies = $self->get_proxies;
+
+    my $count;
+    foreach (@range, @$proxies) {
+        $count->{$_}++;
+    }
+
+    foreach (sort keys %$count) {
+        if ($count->{$_} == 1) {
+            return $_;
+        }
     }
 }
 
@@ -85,7 +123,7 @@ sub _is_listening {
 
     while (!defined $sock && $count++ < $limit) {
         $sock = IO::Socket::INET->new(
-            PeerAddr => 'localhost',
+            PeerAddr => $self->server_addr,
             PeerPort => $self->server_port,
         );
         select(undef, undef, undef, 0.5);
@@ -108,7 +146,7 @@ Browsermob::Server - Perl client to control the Browsermob Proxy server
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 SYNOPSIS
 
@@ -142,6 +180,11 @@ arg when instantiating new proxies.
 
 The path to the browsermob_proxy binary. If you aren't planning to
 call C<start>, this is optional.
+
+=head2 server_addr
+
+The address of the remote server where the Browsermob Proxy server is
+running. This defaults to localhost.
 
 =head2 port
 
@@ -177,6 +220,13 @@ Get a list of currently registered proxies.
 
     my $proxy_aref = $bmp->get_proxies->{proxyList};
     print scalar @$proxy_aref;
+
+=head2 find_open_port
+
+Given a range of valid ports, finds the lowest unused port.
+
+    my $unused_port = $bmp->find_open_port;
+    my $proxy = $bmp->create_proxy(port => $unused_port);
 
 =head1 SEE ALSO
 

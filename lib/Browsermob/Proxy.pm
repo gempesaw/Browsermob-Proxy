@@ -1,5 +1,5 @@
 package Browsermob::Proxy;
-$Browsermob::Proxy::VERSION = '0.05';
+$Browsermob::Proxy::VERSION = '0.06';
 # ABSTRACT: Perl client for the proxies created by the Browsermob server
 use Moo;
 use Carp;
@@ -231,7 +231,7 @@ Browsermob::Proxy - Perl client for the proxies created by the Browsermob server
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 SYNOPSIS
 
@@ -338,7 +338,7 @@ Selenium::Remote::Driver object.
 
     my $proxy = Browsermob::Proxy->new;
     my $driver = Selenium::Remote::Driver->new(
-        browser_name => 'chrome'
+        browser_name => 'chrome',
         proxy        => $proxy->selenium_proxy
     );
     $driver->get('http://www.google.com');
@@ -349,7 +349,7 @@ initiating an unnamed har, unless you pass it something truthy.
 
     my $proxy = Browsermob::Proxy->new;
     my $driver = Selenium::Remote::Driver->new(
-        browser_name => 'chrome'
+        browser_name => 'chrome',
         proxy        => $proxy->selenium_proxy(1)
     );
     # later
