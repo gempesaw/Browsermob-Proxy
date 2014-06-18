@@ -172,6 +172,29 @@ sub get_proxies {
     }
 
 }
+
+=method find_open_port
+
+Given a range of valid ports, finds the lowest unused port.
+
+    my $unused_port = $bmp->find_open_port;
+    my $proxy = $bmp->create_proxy(port => $unused_port);
+
+=cut
+
+sub find_open_port {
+    my ($self, @range) = @_;
+    my $proxies = $self->get_proxies;
+
+    my $count;
+    foreach (@range, @$proxies) {
+        $count->{$_}++;
+    }
+
+    foreach (sort keys %$count) {
+        if ($count->{$_} == 1) {
+            return $_;
+        }
     }
 }
 
