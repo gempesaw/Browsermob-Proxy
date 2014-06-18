@@ -78,6 +78,14 @@ has _pid => (
     default => sub { '' }
 );
 
+has ua => (
+    is => 'rw',
+    lazy => 1,
+    default => sub {
+        return LWP::UserAgent->new;
+    }
+);
+
 =method start
 
 Start a browsermob proxy on C<port>. Starting the server does not create
@@ -150,11 +158,20 @@ Get a list of currently registered proxies.
 
 sub get_proxies {
     my $self = shift;
-    my $ua = shift || LWP::UserAgent->new;
+    my $ua = $self->ua;
 
     my $res = $ua->get('http://' . $self->server_addr . ':' . $self->server_port . '/proxy');
     if ($res->is_success) {
-        return from_json($res->decoded_content);
+        my $list = from_json($res->decoded_content)->{proxyList};
+
+        my @proxies = map {
+            $_->{port};
+        } @$list;
+
+        return \@proxies;
+    }
+
+}
     }
 }
 
