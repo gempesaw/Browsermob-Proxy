@@ -123,6 +123,8 @@ my $spec = {
 
 Optional: specify where the proxy server is; defaults to 127.0.0.1
 
+    my $proxy = Browsermob::Proxy->new(server_addr => '127.0.0.1');
+
 =cut
 
 has server_addr => (
@@ -148,12 +150,9 @@ has server_port => (
 =attr port
 
 Optional: When instantiating a proxy, you can choose the proxy port on
-your own, or let it automatically assign you a port for the proxy.
+your own, or let the server automatically assign you an unused port.
 
-    my $proxy = Browsermob::Proxy->new(
-        server_port => 8080
-        port => 9091
-    );
+    my $proxy = Browsermob::Proxy->new(port => 9091);
 
 =cut
 
@@ -168,7 +167,7 @@ has port => (
 
 Set Net::HTTP::Spore's trace option; defaults to 0; set it to 1 to see
 headers and 2 to see headers and responses. This can only be set during
-construction.
+construction; changing it afterwards will have no impact.
 
     my $proxy = Browsermob::Proxy->new( trace => 2 );
 
@@ -189,6 +188,7 @@ has mock => (
 has _spore => (
     is => 'ro',
     lazy => 1,
+    handles => [keys %{ $spec->{methods} }],
     builder => sub {
         my $self = shift;
         my $client = Net::HTTP::Spore->new_from_string(
@@ -210,8 +210,7 @@ has _spore => (
         }
 
         return $client;
-    },
-    handles => [keys %{ $spec->{methods} }]
+    }
 );
 
 has _spec => (
@@ -262,7 +261,7 @@ sub new_har {
 
 =method har
 
-After creating a proxy and initiating a C<new_har>, you can retrieve
+After creating a proxy and initiating a L<new_har>, you can retrieve
 the contents of the current HAR with this method. It returns a hashref
 HAR, and may in the future return an isntance of L<Archive::HAR>.
 
