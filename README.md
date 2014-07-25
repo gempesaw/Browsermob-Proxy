@@ -6,7 +6,7 @@ Browsermob::Proxy - Perl client for the proxies created by the Browsermob server
 
 # VERSION
 
-version 0.07
+version 0.08
 
 # SYNOPSIS
 
@@ -56,6 +56,8 @@ this module to handle the proxies.
 
 Optional: specify where the proxy server is; defaults to 127.0.0.1
 
+    my $proxy = Browsermob::Proxy->new(server_addr => '127.0.0.1');
+
 ## server\_port
 
 Optional: Indicate at what port we should expect a Browsermob Server
@@ -66,18 +68,15 @@ to be running; defaults to 8080
 ## port
 
 Optional: When instantiating a proxy, you can choose the proxy port on
-your own, or let it automatically assign you a port for the proxy.
+your own, or let the server automatically assign you an unused port.
 
-    my $proxy = Browsermob::Proxy->new(
-        server_port => 8080
-        port => 9091
-    );
+    my $proxy = Browsermob::Proxy->new(port => 9091);
 
 ## trace
 
 Set Net::HTTP::Spore's trace option; defaults to 0; set it to 1 to see
 headers and 2 to see headers and responses. This can only be set during
-construction.
+construction; changing it afterwards will have no impact.
 
     my $proxy = Browsermob::Proxy->new( trace => 2 );
 
@@ -95,7 +94,7 @@ also pass a string to choose your own initial page ref.
 
 ## har
 
-After creating a proxy and initiating a `new_har`, you can retrieve
+After creating a proxy and initiating a [new\_har](https://metacpan.org/pod/new_har), you can retrieve
 the contents of the current HAR with this method. It returns a hashref
 HAR, and may in the future return an isntance of [Archive::HAR](https://metacpan.org/pod/Archive::HAR).
 
@@ -127,6 +126,29 @@ initiating an unnamed har, unless you pass it something truthy.
     $proxy->new_har;
     $driver->get('http://www.google.com');
     print Dumper $proxy->har;
+
+## firefox\_proxy
+
+Generate a hash with the proper keys and values that for use in
+setting preferences for a
+[Selenium::Remote::Driver::Firefox::Profile](https://metacpan.org/pod/Selenium::Remote::Driver::Firefox::Profile). This method returns a
+hashref; dereference it when you pass it to
+["set\_preference" in Selenium::Remote::Driver::Firefox::Profile](https://metacpan.org/pod/Selenium::Remote::Driver::Firefox::Profile#set_preference):
+
+    my $profile = Selenium::Remote::Driver::Firefox::Profile->new;
+
+    my $firefox_pref = $proxy->firefox_proxy;
+    $profile->set_preference( %{ $firefox_pref } );
+
+    my $driver = Selenium::Remote::Driver->new_from_caps(
+        desired_capabilities => {
+            browserName => 'Firefox',
+            firefox_profile => $profile->_encode
+        }
+    );
+
+N.B.: `firefox_proxy` will AUTOMATICALLY call ["new\_har"](#new_har) for you
+initiating an unnamed har, unless you pass it something truthy.
 
 ## ua\_proxy
 
