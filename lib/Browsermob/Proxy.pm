@@ -316,6 +316,45 @@ sub selenium_proxy {
     };
 }
 
+=method firefox_proxy
+
+Generate a hash with the proper keys and values that for use in
+setting preferences for a
+L<Selenium::Remote::Driver::Firefox::Profile>. This method returns a
+hashref; dereference it when you pass it to
+L<Selenium::Remote::Driver::Firefox::Profile/set_preference>:
+
+
+    my $profile = Selenium::Remote::Driver::Firefox::Profile->new;
+
+    my $firefox_pref = $proxy->firefox_proxy;
+    $profile->set_preference( %{ $firefox_pref } );
+
+    my $driver = Selenium::Remote::Driver->new_from_caps(
+        desired_capabilities => {
+            browserName => 'Firefox',
+            firefox_profile => $profile->_encode
+        }
+    );
+
+N.B.: C<firefox_proxy> will AUTOMATICALLY call L</new_har> for you
+initiating an unnamed har, unless you pass it something truthy.
+
+=cut
+
+sub firefox_proxy {
+    my ($self, $initiate_manually) = @_;
+    $self->new_har unless $initiate_manually;
+
+    return {
+        'network.proxy.type' => 1,
+        'network.proxy.http' => $self->server_addr,
+        'network.proxy.http_port' => $self->port,
+        'network.proxy.ssl' => $self->server_addr,
+        'network.proxy.ssl_port' => $self->port
+    };
+}
+
 =method ua_proxy
 
 Generate the proper arguments for the proxy method of
