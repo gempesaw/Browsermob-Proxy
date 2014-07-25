@@ -138,6 +138,28 @@ CAPABILITIES: {
 
         ok($new_har_was_called, 'invoking selenium_proxy creates a new har by default');
     }
+
+  FIREFOX_PROXY: {
+        my $mock_server = generate_mock_server();
+
+        my $firefox_prefs = Browsermob::Proxy->new(
+            server_port => $server_port,
+            port => $port,
+            mock => $mock_server
+        )->firefox_proxy('do not initiate');
+
+        my @required_keys = qw/
+                                  network.proxy.type
+                                  network.proxy.http
+                                  network.proxy.http_port
+                                  network.proxy.ssl
+                                  network.proxy.ssl_port
+                              /;
+
+        foreach (@required_keys) {
+            ok(exists $firefox_prefs->{$_}, $_ . ' exists in firefox prefs.');
+        }
+    }
 }
 
 BASIC_AUTH: {

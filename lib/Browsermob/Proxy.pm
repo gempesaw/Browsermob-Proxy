@@ -1,5 +1,5 @@
 package Browsermob::Proxy;
-$Browsermob::Proxy::VERSION = '0.07';
+$Browsermob::Proxy::VERSION = '0.08';
 # ABSTRACT: Perl client for the proxies created by the Browsermob server
 use Moo;
 use Carp;
@@ -107,6 +107,7 @@ has mock => (
 has _spore => (
     is => 'ro',
     lazy => 1,
+    handles => [keys %{ $spec->{methods} }],
     builder => sub {
         my $self = shift;
         my $client = Net::HTTP::Spore->new_from_string(
@@ -128,8 +129,7 @@ has _spore => (
         }
 
         return $client;
-    },
-    handles => [keys %{ $spec->{methods} }]
+    }
 );
 
 has _spec => (
@@ -188,6 +188,20 @@ sub selenium_proxy {
 }
 
 
+sub firefox_proxy {
+    my ($self, $initiate_manually) = @_;
+    $self->new_har unless $initiate_manually;
+
+    return {
+        'network.proxy.type' => 1,
+        'network.proxy.http' => $self->server_addr,
+        'network.proxy.http_port' => $self->port,
+        'network.proxy.ssl' => $self->server_addr,
+        'network.proxy.ssl_port' => $self->port
+    };
+}
+
+
 sub ua_proxy {
     my ($self, $initiate_manually) = @_;
     $self->new_har unless $initiate_manually;
@@ -231,7 +245,7 @@ Browsermob::Proxy - Perl client for the proxies created by the Browsermob server
 
 =head1 VERSION
 
-version 0.07
+version 0.08
 
 =head1 SYNOPSIS
 
@@ -285,6 +299,8 @@ this module to handle the proxies.
 
 Optional: specify where the proxy server is; defaults to 127.0.0.1
 
+    my $proxy = Browsermob::Proxy->new(server_addr => '127.0.0.1');
+
 =head2 server_port
 
 Optional: Indicate at what port we should expect a Browsermob Server
@@ -295,18 +311,15 @@ to be running; defaults to 8080
 =head2 port
 
 Optional: When instantiating a proxy, you can choose the proxy port on
-your own, or let it automatically assign you a port for the proxy.
+your own, or let the server automatically assign you an unused port.
 
-    my $proxy = Browsermob::Proxy->new(
-        server_port => 8080
-        port => 9091
-    );
+    my $proxy = Browsermob::Proxy->new(port => 9091);
 
 =head2 trace
 
 Set Net::HTTP::Spore's trace option; defaults to 0; set it to 1 to see
 headers and 2 to see headers and responses. This can only be set during
-construction.
+construction; changing it afterwards will have no impact.
 
     my $proxy = Browsermob::Proxy->new( trace => 2 );
 
@@ -324,7 +337,7 @@ also pass a string to choose your own initial page ref.
 
 =head2 har
 
-After creating a proxy and initiating a C<new_har>, you can retrieve
+After creating a proxy and initiating a L<new_har>, you can retrieve
 the contents of the current HAR with this method. It returns a hashref
 HAR, and may in the future return an isntance of L<Archive::HAR>.
 
@@ -356,6 +369,29 @@ initiating an unnamed har, unless you pass it something truthy.
     $proxy->new_har;
     $driver->get('http://www.google.com');
     print Dumper $proxy->har;
+
+=head2 firefox_proxy
+
+Generate a hash with the proper keys and values that for use in
+setting preferences for a
+L<Selenium::Remote::Driver::Firefox::Profile>. This method returns a
+hashref; dereference it when you pass it to
+L<Selenium::Remote::Driver::Firefox::Profile/set_preference>:
+
+    my $profile = Selenium::Remote::Driver::Firefox::Profile->new;
+
+    my $firefox_pref = $proxy->firefox_proxy;
+    $profile->set_preference( %{ $firefox_pref } );
+
+    my $driver = Selenium::Remote::Driver->new_from_caps(
+        desired_capabilities => {
+            browserName => 'Firefox',
+            firefox_profile => $profile->_encode
+        }
+    );
+
+N.B.: C<firefox_proxy> will AUTOMATICALLY call L</new_har> for you
+initiating an unnamed har, unless you pass it something truthy.
 
 =head2 ua_proxy
 

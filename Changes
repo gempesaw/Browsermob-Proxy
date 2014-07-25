@@ -1,5 +1,9 @@
 Revision history for perl module Browsermob::Proxy
 
+0.08 2014-07-25
+ - Clean up various documentation points
+ - Add convenience fn for generating firefox preferences for proxy
+
 0.05 2014-05-24
  - Implement basic auth endpoint
 
