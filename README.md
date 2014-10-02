@@ -6,7 +6,7 @@ Browsermob::Proxy - Perl client for the proxies created by the Browsermob server
 
 # VERSION
 
-version 0.08
+version 0.09
 
 # SYNOPSIS
 
@@ -193,3 +193,10 @@ feature.
 # AUTHOR
 
 Daniel Gempesaw <gempesaw@gmail.com>
+
+# COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2014 by Daniel Gempesaw.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
