@@ -7,7 +7,7 @@ use IO::Socket::INET;
 use LWP::UserAgent;
 use Test::Spec;
 use Test::Deep;
-use Browsermob::Proxy::CompareParams qw/cmp_request_params/;
+use Browsermob::Proxy::CompareParams qw/cmp_request_params convert_har_params_to_hash/;
 
 describe 'Request parameter comparison' => sub {
     my ($requests, $assert);
@@ -39,7 +39,7 @@ describe 'Request parameter comparison' => sub {
     };
 
     it 'should know how to convert har params' => sub {
-        my $converted = Browsermob::Proxy::CompareParams::convert_har_params_to_hash($requests);
+        my $converted = convert_har_params_to_hash($requests);
         my $expected = [
             {
                 query => 'string'

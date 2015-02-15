@@ -2,8 +2,9 @@ package Browsermob::Proxy::CompareParams;
 
 # ABSTRACT: Look for a request with the specified matching request params
 require Exporter;
-our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(cmp_request_params);
+our @ISA = qw/Exporter/;
+our @EXPORT = qw/cmp_request_params/;
+our @EXPORT_OK = qw/convert_har_params_to_hash/;
 
 =head1 SYNOPSIS
 
@@ -44,8 +45,8 @@ sub cmp_request_params {
 
 =method convert_har_params_to_hash
 
-This isn't exported at all; we wouldn't expect that you'd need to use
-it. But, if you're interested: the har format is a bit unwieldy to
+This isn't exported by default; we wouldn't expect that you'd need to
+use it. But, if you're interested: the har format is a bit unwieldy to
 work with. The requests come in an array of objects. Each object in
 the array is a hash with a request key which points to an object with
 a queryString key. The queryString object is an array of hashes with
@@ -86,8 +87,8 @@ param values:
 
 sub convert_har_params_to_hash {
     my ($har_or_requests) = @_;
-    my $requests;
 
+    my $requests;
     if (ref($har_or_requests) eq 'HASH' && exists $har_or_requests->{log}->{entries}) {
         $requests = $har_or_requests->{log}->{entries};
     }
