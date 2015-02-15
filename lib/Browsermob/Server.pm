@@ -107,7 +107,6 @@ sub start {
         # exec to replace ourselves with the proxy
         my $cmd = 'sh ' . $self->path . ' -port ' . $self->server_port . ' 2>&1 > /dev/null';
         exec($cmd);
-        exit(0);
     }
 }
 
@@ -202,20 +201,16 @@ sub find_open_port {
 
 
 sub _is_listening {
-    my $self = shift;
-    my $sock = undef;
-    my $count = 0;
-    my $limit = 60;
+    my ($self, $timeout) = @_;
+    $timeout //= 30;
 
-    while (!defined $sock && $count++ < $limit) {
-        $sock = IO::Socket::INET->new(
-            PeerAddr => $self->server_addr,
-            PeerPort => $self->server_port,
-        );
-        select(undef, undef, undef, 0.5);
-    }
+    my $sock = IO::Socket::INET->new(
+        PeerAddr => $self->server_addr,
+        PeerPort => $self->server_port,
+        Timeout => $timeout
+    );
 
-    return defined $sock;
+    return $sock;
 }
 
 1;
