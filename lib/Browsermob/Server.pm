@@ -1,5 +1,5 @@
 package Browsermob::Server;
-$Browsermob::Server::VERSION = '0.08';
+$Browsermob::Server::VERSION = '0.09';
 # ABSTRACT: Perl client to control the Browsermob Proxy server
 use strict;
 use warnings;
@@ -57,7 +57,6 @@ sub start {
         # exec to replace ourselves with the proxy
         my $cmd = 'sh ' . $self->path . ' -port ' . $self->server_port . ' 2>&1 > /dev/null';
         exec($cmd);
-        exit(0);
     }
 }
 
@@ -117,20 +116,16 @@ sub find_open_port {
 
 
 sub _is_listening {
-    my $self = shift;
-    my $sock = undef;
-    my $count = 0;
-    my $limit = 60;
+    my ($self, $timeout) = @_;
+    $timeout //= 30;
 
-    while (!defined $sock && $count++ < $limit) {
-        $sock = IO::Socket::INET->new(
-            PeerAddr => $self->server_addr,
-            PeerPort => $self->server_port,
-        );
-        select(undef, undef, undef, 0.5);
-    }
+    my $sock = IO::Socket::INET->new(
+        PeerAddr => $self->server_addr,
+        PeerPort => $self->server_port,
+        Timeout => $timeout
+    );
 
-    return defined $sock;
+    return $sock;
 }
 
 1;
@@ -147,7 +142,7 @@ Browsermob::Server - Perl client to control the Browsermob Proxy server
 
 =head1 VERSION
 
-version 0.08
+version 0.09
 
 =head1 SYNOPSIS
 
@@ -254,5 +249,12 @@ feature.
 =head1 AUTHOR
 
 Daniel Gempesaw <gempesaw@gmail.com>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2014 by Daniel Gempesaw.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut

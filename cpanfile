@@ -1,4 +1,5 @@
 requires "Carp" => "0";
+requires "Exporter" => "0";
 requires "IO::Socket::INET" => "0";
 requires "JSON" => "0";
 requires "LWP::UserAgent" => "0";
@@ -13,13 +14,15 @@ on 'test' => sub {
   requires "Data::Dumper" => "0";
   requires "Net::HTTP::Spore::Middleware::Mock" => "0";
   requires "Net::Ping" => "0";
+  requires "Test::Deep" => "0";
   requires "Test::LWP::UserAgent" => "0";
   requires "Test::More" => "0";
+  requires "Test::Spec" => "0";
   requires "Try::Tiny" => "0";
 };
 
 on 'configure' => sub {
-  requires "ExtUtils::MakeMaker" => "6.30";
+  requires "ExtUtils::MakeMaker" => "0";
 };
 
 on 'develop' => sub {

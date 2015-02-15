@@ -1,5 +1,5 @@
 package Browsermob::Proxy;
-$Browsermob::Proxy::VERSION = '0.08';
+$Browsermob::Proxy::VERSION = '0.09';
 # ABSTRACT: Perl client for the proxies created by the Browsermob server
 use Moo;
 use Carp;
@@ -226,7 +226,10 @@ sub add_basic_auth {
 
 sub DESTROY {
     my $self = shift;
-    $self->delete_proxy;
+    # Suppress warnings around automatic proxy deletion unless we're
+    # in debug mode
+    eval { $self->delete_proxy; };
+    warn $@ if $@ and $self->trace;
 }
 
 1;
@@ -245,7 +248,7 @@ Browsermob::Proxy - Perl client for the proxies created by the Browsermob server
 
 =head1 VERSION
 
-version 0.08
+version 0.09
 
 =head1 SYNOPSIS
 
@@ -448,5 +451,12 @@ feature.
 =head1 AUTHOR
 
 Daniel Gempesaw <gempesaw@gmail.com>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2014 by Daniel Gempesaw.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut

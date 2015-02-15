@@ -4,7 +4,7 @@
       "Daniel Gempesaw <gempesaw@gmail.com>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 5.014, CPAN::Meta::Converter version 2.140640",
+   "generated_by" : "Dist::Zilla version 5.031, CPAN::Meta::Converter version 2.143240",
    "license" : [
       "perl_5"
    ],
@@ -16,7 +16,7 @@
    "prereqs" : {
       "configure" : {
          "requires" : {
-            "ExtUtils::MakeMaker" : "6.30"
+            "ExtUtils::MakeMaker" : "0"
          }
       },
       "develop" : {
@@ -29,6 +29,7 @@
       "runtime" : {
          "requires" : {
             "Carp" : "0",
+            "Exporter" : "0",
             "IO::Socket::INET" : "0",
             "JSON" : "0",
             "LWP::UserAgent" : "0",
@@ -45,8 +46,10 @@
             "Data::Dumper" : "0",
             "Net::HTTP::Spore::Middleware::Mock" : "0",
             "Net::Ping" : "0",
+            "Test::Deep" : "0",
             "Test::LWP::UserAgent" : "0",
             "Test::More" : "0",
+            "Test::Spec" : "0",
             "Try::Tiny" : "0"
          }
       }
@@ -56,12 +59,13 @@
       "bugtracker" : {
          "web" : "https://github.com/gempesaw/Browsermob-Proxy/issues"
       },
+      "homepage" : "https://github.com/gempesaw/Browsermob-Proxy",
       "repository" : {
          "type" : "git",
-         "url" : "git://github.com/gempesaw/Browsermob-Proxy.git",
+         "url" : "https://github.com/gempesaw/Browsermob-Proxy.git",
          "web" : "https://github.com/gempesaw/Browsermob-Proxy"
       }
    },
-   "version" : "0.08"
+   "version" : "0.09"
 }
 

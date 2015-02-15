@@ -7,13 +7,15 @@ build_requires:
   Data::Dumper: '0'
   Net::HTTP::Spore::Middleware::Mock: '0'
   Net::Ping: '0'
+  Test::Deep: '0'
   Test::LWP::UserAgent: '0'
   Test::More: '0'
+  Test::Spec: '0'
   Try::Tiny: '0'
 configure_requires:
-  ExtUtils::MakeMaker: '6.30'
+  ExtUtils::MakeMaker: '0'
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 5.014, CPAN::Meta::Converter version 2.140640'
+generated_by: 'Dist::Zilla version 5.031, CPAN::Meta::Converter version 2.143240'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -21,6 +23,7 @@ meta-spec:
 name: Browsermob-Proxy
 requires:
   Carp: '0'
+  Exporter: '0'
   IO::Socket::INET: '0'
   JSON: '0'
   LWP::UserAgent: '0'
@@ -31,5 +34,6 @@ requires:
   warnings: '0'
 resources:
   bugtracker: https://github.com/gempesaw/Browsermob-Proxy/issues
-  repository: git://github.com/gempesaw/Browsermob-Proxy.git
-version: '0.08'
+  homepage: https://github.com/gempesaw/Browsermob-Proxy
+  repository: https://github.com/gempesaw/Browsermob-Proxy.git
+version: '0.09'
