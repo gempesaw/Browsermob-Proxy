@@ -8,7 +8,27 @@ our @EXPORT_OK = qw/convert_har_params_to_hash/;
 
 =head1 SYNOPSIS
 
+    # create a har with traffic
+    my $ua = LWP::UserAgent->new;
+    my $proxy = Browsermob::Server->new->create_proxy;
+    $ua->proxy($proxy->ua_proxy);
+    $ua->get('http://www.perl.org/?query=string');
+    my $har = $proxy->har;
+
+    # ask the har if any requests have the following query params
+    my $request_found = cmp_request_params($har, { query => 'string' });
+    if ($request_found) {
+        print 'A request was found with ?query=string in it';
+    }
+
 =head1 DESCRIPTION
+
+Our primary use of Browsermob::Proxy is for checking analytics
+requests. They're transferred primarily in the form of request
+parameters, so it behooves us to make it easy to check if our HAR has
+any requests that match a set of our expected request params.
+
+By default, we only export the one function: L</cmp_request_params>.
 
 =cut
 
@@ -16,8 +36,12 @@ our @EXPORT_OK = qw/convert_har_params_to_hash/;
 
 Pass in a $har object genereated by L</Browsermob::Proxy>, as well as
 a hashref of key/value pairs of the request params that you want to
-find. This method will return true if a request can be found with all
-of the expected_params key/value pairs.
+find. This method will return the number of requests that can be found
+with all of the expected_params key/value pairs. If no requests are
+found, it returns that number: 0.
+
+    # look for a request matching ?expected=params&go=here
+    cmp_request_params($har, { expected => 'params', go => 'here' });
 
 =cut
 
