@@ -140,6 +140,11 @@ SKIP: {
         it 'should reject non-matching traffic' => sub {
             ok( ! cmp_request_params($har, { query2 => 'string2' }));
         };
+
+        after each => sub {
+            $proxy->delete_proxy;
+        };
+
     };
 }
 
