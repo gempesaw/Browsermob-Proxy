@@ -405,7 +405,10 @@ sub add_basic_auth {
 
 sub DESTROY {
     my $self = shift;
-    $self->delete_proxy;
+    # Suppress warnings around automatic proxy deletion unless we're
+    # in debug mode
+    eval { $self->delete_proxy; };
+    warn $@ if $@ and $self->trace;
 }
 
 1;
