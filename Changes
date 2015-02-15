@@ -1,5 +1,10 @@
 Revision history for perl module Browsermob::Proxy
 
+0.09 2015-02-15
+ - Add package for comparing request parameters
+ - Poorly clean up warnings during destruction. This is still broken,
+   though :(
+
 0.08 2014-07-25
  - Clean up various documentation points
  - Add convenience fn for generating firefox preferences for proxy
