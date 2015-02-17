@@ -9,31 +9,26 @@ use Test::Spec;
 use Test::Deep;
 use Browsermob::Proxy::CompareParams qw/cmp_request_params convert_har_params_to_hash/;
 
-describe 'Request parameter comparison' => sub {
+describe 'Param comparison' => sub {
     my ($requests, $assert);
 
     before each => sub {
         $requests = [{
             request => {
-                queryString => [
-                    {
-                        name => 'query',
-                        value => 'string'
-                    },
-                ]
+                queryString => [{
+                    name => 'query',
+                    value => 'string'
+                }]
             }
         }, {
             request => {
-                queryString => [
-                    {
-                        name => 'query2',
-                        value => 'string2'
-                    },
-                    {
-                        name => 'query3',
-                        value => 'string3'
-                    }
-                ]
+                queryString => [{
+                    name => 'query2',
+                    value => 'string2'
+                }, {
+                    name => 'query3',
+                    value => 'string3'
+                }]
             }
         }];
     };
@@ -84,12 +79,10 @@ describe 'Request parameter comparison' => sub {
         ok(cmp_request_params($requests, $assert));
     };
 
-
     it 'should pass on a subset match: some keys' => sub {
         $assert = { query2 => 'string2' };
         ok(cmp_request_params($requests, $assert));
     };
-
 
     it 'should fail on assert missing key' => sub {
         $assert = { missing => 'string' };
