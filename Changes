@@ -1,5 +1,9 @@
 Revision history for perl module Browsermob::Proxy
 
+0.10 2015-02-17
+ - Return missing params when cmp_request_params is called in list
+   context
+
 0.09 2015-02-15
  - Add package for comparing request parameters
  - Poorly clean up warnings during destruction. This is still broken,
