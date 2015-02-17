@@ -9,31 +9,26 @@ use Test::Spec;
 use Test::Deep;
 use Browsermob::Proxy::CompareParams qw/cmp_request_params convert_har_params_to_hash/;
 
-describe 'Request parameter comparison' => sub {
+describe 'Param comparison' => sub {
     my ($requests, $assert);
 
     before each => sub {
         $requests = [{
             request => {
-                queryString => [
-                    {
-                        name => 'query',
-                        value => 'string'
-                    },
-                ]
+                queryString => [{
+                    name => 'query',
+                    value => 'string'
+                }]
             }
         }, {
             request => {
-                queryString => [
-                    {
-                        name => 'query2',
-                        value => 'string2'
-                    },
-                    {
-                        name => 'query3',
-                        value => 'string3'
-                    }
-                ]
+                queryString => [{
+                    name => 'query2',
+                    value => 'string2'
+                }, {
+                    name => 'query3',
+                    value => 'string3'
+                }]
             }
         }];
     };
@@ -84,12 +79,10 @@ describe 'Request parameter comparison' => sub {
         ok(cmp_request_params($requests, $assert));
     };
 
-
     it 'should pass on a subset match: some keys' => sub {
         $assert = { query2 => 'string2' };
         ok(cmp_request_params($requests, $assert));
     };
-
 
     it 'should fail on assert missing key' => sub {
         $assert = { missing => 'string' };
@@ -107,6 +100,71 @@ describe 'Request parameter comparison' => sub {
             missing => 'pair'
         };
         ok( ! cmp_request_params($requests, $assert));
+    };
+
+    describe 'in list context' => sub {
+        before each => sub {
+            my $list_context_fixtures = [{
+                request => {
+                    queryString => [{
+                        name => 'query2',
+                        value => 'string2'
+                    }]
+                }
+            }, {
+                request => {
+                    queryString => [{
+                        name => 'query',
+                        value => 'string'
+                    }, {
+                        name => 'query2',
+                        value => 'string2'
+                    }, {
+                        name => 'query3',
+                        value => 'string3'
+                    }]
+                }
+            }];
+
+            push( @{ $requests }, @{ $list_context_fixtures } );
+        };
+
+        it 'should return an empty hashref when succeeding' => sub {
+            $assert = { query => 'string' };
+
+            my ($status, $missing) = cmp_request_params($requests, $assert);
+            cmp_deeply($missing, { });
+        };
+
+        it 'should return a missing key' => sub {
+            $assert = {
+                query => 'string',
+                missing => 'pair'
+            };
+
+            my ($status, $missing) = cmp_request_params($requests, $assert);
+            cmp_deeply($missing, { missing => 'pair' });
+        };
+
+        it 'should return an incorrect value' => sub {
+            $assert = { query => 'incorrect' };
+
+            my ($status, $missing) = cmp_request_params($requests, $assert);
+            cmp_deeply( $missing, { query => 'incorrect' } );
+        };
+
+        it 'should return the closest request' => sub {
+            $assert = {
+                query2 => 'string2',
+                query3 => 'string3',
+                missing => 'param'
+            };
+
+            my ($status, $missing) = cmp_request_params($requests, $assert);
+            cmp_deeply($missing, { missing => 'param' } );
+
+        };
+
     };
 };
 

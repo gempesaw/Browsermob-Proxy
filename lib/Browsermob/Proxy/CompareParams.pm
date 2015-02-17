@@ -1,5 +1,5 @@
 package Browsermob::Proxy::CompareParams;
-$Browsermob::Proxy::CompareParams::VERSION = '0.09';
+$Browsermob::Proxy::CompareParams::VERSION = '0.10';
 # ABSTRACT: Look for a request with the specified matching request params
 require Exporter;
 our @ISA = qw/Exporter/;
@@ -12,6 +12,9 @@ sub cmp_request_params {
     my ($got, $expected) = @_;
     my $got_hash = convert_har_params_to_hash($got);
 
+    # Start by assuming that we can't find any of our expected keys
+    my @least_missing = keys %{ $expected };
+
     my @matched = grep {
         my $actual_params = $_;
 
@@ -22,12 +25,26 @@ sub cmp_request_params {
             ! ( exists $actual_params->{$_} and $actual_params->{$_} eq $expected->{$_} )
         } keys %{ $expected };
 
-        # @missing should be empty for a successful request/assert
+        if (scalar @missing < scalar @least_missing) {
+            @least_missing = @missing;
+        }
+
+        # @missing will be empty for a successful request/assert
         # match.
         ! ( scalar @missing )
     } @{ $got_hash };
 
-    return scalar @matched;
+    if (wantarray) {
+        # In list context, provide the closest match for context on
+        # the caller's side
+        my $missing = { map {
+            $_ => $expected->{$_}
+        } @least_missing };
+        return (scalar @matched, $missing);
+    }
+    else {
+        return scalar @matched;
+    }
 }
 
 
@@ -71,7 +88,7 @@ Browsermob::Proxy::CompareParams - Look for a request with the specified matchin
 
 =head1 VERSION
 
-version 0.09
+version 0.10
 
 =head1 SYNOPSIS
 
@@ -103,12 +120,24 @@ By default, we only export the one function: L</cmp_request_params>.
 
 Pass in a $har object genereated by L</Browsermob::Proxy>, as well as
 a hashref of key/value pairs of the request params that you want to
-find. This method will return the number of requests that can be found
-with all of the expected_params key/value pairs. If no requests are
-found, it returns that number: 0.
+find. In scalar context, this method will return the number of
+requests that can be found with all of the expected_params key/value
+pairs. If no requests are found, it returns that number: 0. So, the
+scalar context returns a boolean if we were able to find any matching
+requests.
 
     # look for a request matching ?expected=params&go=here
-    cmp_request_params($har, { expected => 'params', go => 'here' });
+    my $bool = cmp_request_params($har, { expected => 'params', go => 'here' });
+    say 'We found it!' if $bool;
+
+In list context, the sub will return the boolean status as before, as
+well as a hashref with the missing pieces from the closest request.
+
+    my ($bool, $missing_params) = cmp_request_params($har, $expected);
+    if ( ! $bool ) {
+        say 'We are missing: ';
+        print Dumper $missing_params;
+    }
 
 =head2 convert_har_params_to_hash
 
