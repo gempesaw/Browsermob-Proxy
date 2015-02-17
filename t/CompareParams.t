@@ -101,6 +101,71 @@ describe 'Param comparison' => sub {
         };
         ok( ! cmp_request_params($requests, $assert));
     };
+
+    describe 'in list context' => sub {
+        before each => sub {
+            my $list_context_fixtures = [{
+                request => {
+                    queryString => [{
+                        name => 'query2',
+                        value => 'string2'
+                    }]
+                }
+            }, {
+                request => {
+                    queryString => [{
+                        name => 'query',
+                        value => 'string'
+                    }, {
+                        name => 'query2',
+                        value => 'string2'
+                    }, {
+                        name => 'query3',
+                        value => 'string3'
+                    }]
+                }
+            }];
+
+            push( @{ $requests }, @{ $list_context_fixtures } );
+        };
+
+        it 'should return an empty hashref when succeeding' => sub {
+            $assert = { query => 'string' };
+
+            my ($status, $missing) = cmp_request_params($requests, $assert);
+            cmp_deeply($missing, { });
+        };
+
+        it 'should return a missing key' => sub {
+            $assert = {
+                query => 'string',
+                missing => 'pair'
+            };
+
+            my ($status, $missing) = cmp_request_params($requests, $assert);
+            cmp_deeply($missing, { missing => 'pair' });
+        };
+
+        it 'should return an incorrect value' => sub {
+            $assert = { query => 'incorrect' };
+
+            my ($status, $missing) = cmp_request_params($requests, $assert);
+            cmp_deeply( $missing, { query => 'incorrect' } );
+        };
+
+        it 'should return the closest request' => sub {
+            $assert = {
+                query2 => 'string2',
+                query3 => 'string3',
+                missing => 'param'
+            };
+
+            my ($status, $missing) = cmp_request_params($requests, $assert);
+            cmp_deeply($missing, { missing => 'param' } );
+
+        };
+
+    };
 };
 
 SKIP: {
