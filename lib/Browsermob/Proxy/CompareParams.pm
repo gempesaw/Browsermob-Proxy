@@ -1,6 +1,7 @@
 package Browsermob::Proxy::CompareParams;
 
 # ABSTRACT: Look for a request with the specified matching request params
+use Carp qw/croak/;
 require Exporter;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/cmp_request_params/;
@@ -58,8 +59,9 @@ well as a hashref with the missing pieces from the closest request.
 =cut
 
 sub cmp_request_params {
-    my ($got, $expected) = @_;
+    my ($got, $expected, $user_cmp) = @_;
     my $got_hash = convert_har_params_to_hash($got);
+    my $compare = generate_comparison_sub($user_cmp);
 
     # Start by assuming that we can't find any of our expected keys
     my @least_missing = keys %{ $expected };
@@ -71,7 +73,18 @@ sub cmp_request_params {
         # either do not exist in actual params, or they do exist but
         # the values aren't the same.
         my @missing = grep {
-            ! ( exists $actual_params->{$_} and $actual_params->{$_} eq $expected->{$_} )
+            if ( exists $actual_params->{$_} ) {
+                my ($got, $exp) = ($actual_params->{$_}, $expected->{$_});
+                if ( $compare->( $got, $exp ) ) {
+                    ''
+                }
+                else {
+                    'missing'
+                }
+            }
+            else {
+                'missing'
+            }
         } keys %{ $expected };
 
         if (scalar @missing < scalar @least_missing) {
@@ -161,7 +174,29 @@ sub convert_har_params_to_hash {
     ];
 
     return $hash;
+}
+
+sub generate_comparison_sub {
+    my ($user_comparison) = @_;
+    my $string_equality = sub { $_[0] eq $_[1] };
+
+    if (! defined $user_comparison) {
+        return $string_equality;
+    }
+
+    my $ref = ref($user_comparison);
+    if ($ref ne 'CODE') {
+        croak 'We expected your custom comparison to be a CODEREF, not a ' . $ref . '!';
+    }
+
+    return sub {
+        my ($got, $expected) = @_;
+
+        return $string_equality->($got, $expected) || $user_comparison->($got, $expected);
+    };
 
 }
+
+
 
 1;
