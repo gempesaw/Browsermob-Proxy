@@ -7,7 +7,11 @@ use IO::Socket::INET;
 use LWP::UserAgent;
 use Test::Spec;
 use Test::Deep;
-use Browsermob::Proxy::CompareParams qw/cmp_request_params convert_har_params_to_hash/;
+use Browsermob::Proxy::CompareParams qw/cmp_request_params
+                                        convert_har_params_to_hash
+                                        collect_query_param_keys
+                                        replace_placeholder_values
+                                       /;
 
 describe 'Param comparison' => sub {
     my ($requests, $assert);
@@ -166,6 +170,106 @@ describe 'Param comparison' => sub {
         };
 
     };
+
+    describe 'custom comparison' => sub {
+        my ($regex_cmp);
+
+        before each => sub {
+            $regex_cmp = sub {
+                my ($string, $regex_contents) = @_;
+
+                return $string =~ /$regex_contents/i;
+            };
+        };
+
+        it 'should accept a custom comparison subroutine' => sub {
+            # shouldn't match, but the custom comparison sub should
+            # override the failed string match
+            my $cmp = sub { 1 };
+            $assert = { query => 'does not match' };
+            ok( cmp_request_params($requests, $assert, $cmp) );
+        };
+
+        it 'should be able to pass regex comparisons in the custom sub' => sub {
+            # the value isn't a string match, but it would be a regex
+            # match
+            $assert = { query => '.*' };
+            ok( cmp_request_params($requests, $assert, $regex_cmp) );
+        };
+
+        it 'should work fine with a more complicated assert' => sub {
+            $assert = { query2 => '.*', query3 => '3$' };
+            ok( cmp_request_params($requests, $assert, $regex_cmp) );
+        };
+
+        it 'should fail non-matching regex custom subs' => sub {
+            # We can fail in a custom sub as well
+            $assert = { query => '.*2$' };
+            ok( ! cmp_request_params($requests, $assert, $regex_cmp) );
+        };
+    };
+
+};
+
+describe 'Placeholder values' => sub {
+    my ($requests, $assert);
+    before each => sub {
+        $requests = [{
+            request => {
+                queryString => [{
+                    name => 'query',
+                    value => 'string'
+                }, {
+                    name => 'query2',
+                    value => 'string'
+                }]
+            }
+        }, {
+            request => {
+                queryString => [{
+                    name => 'query2',
+                    value => 'string2'
+                }, {
+                    name => 'query3',
+                    value => 'string3'
+                }]
+            }
+        }];
+
+        $assert = { query => 'string', query2 => ':query' };
+    };
+
+    it 'should collect query param keys properly' => sub {
+        my $query_keys = collect_query_param_keys($requests);
+        cmp_deeply($query_keys, [ 'query', 'query2', 'query3' ]);
+    };
+
+    it 'should pass through a normal assert' => sub {
+        $assert->{query2} = 'string';
+        my $mutated = replace_placeholder_values($requests, $assert);
+        cmp_deeply($mutated, $assert);
+    };
+
+    it 'should mutate an assert with a keyref in it' => sub {
+        my $mutated = replace_placeholder_values($requests, $assert);
+        cmp_deeply($mutated, { query => 'string', query2 => 'string' } );
+    };
+
+    it 'should not mutate assert values that are missing a corresponding actual key' => sub {
+        $assert = { query => ':query_missing' };
+        my $mutated = replace_placeholder_values($requests, $assert);
+        cmp_deeply($mutated, $assert);
+    };
+
+    it 'should pass a mutated assert through cmp_request_params' => sub {
+        my $mutated = replace_placeholder_values($requests, $assert);
+        ok( cmp_request_params($requests, $mutated) );
+    };
+
+    it 'should fail an assert with a placeholder through cmp_request_params' => sub {
+        ok( ! cmp_request_params($requests, $assert) );
+    };
+
 };
 
 SKIP: {

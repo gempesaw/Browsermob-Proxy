@@ -1,16 +1,20 @@
 package Browsermob::Proxy::CompareParams;
-$Browsermob::Proxy::CompareParams::VERSION = '0.10';
+$Browsermob::Proxy::CompareParams::VERSION = '0.11';
 # ABSTRACT: Look for a request with the specified matching request params
+use Carp qw/croak/;
 require Exporter;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/cmp_request_params/;
-our @EXPORT_OK = qw/convert_har_params_to_hash/;
+our @EXPORT_OK = qw/convert_har_params_to_hash
+                    replace_placeholder_values
+                    collect_query_param_keys/;
 
 
 
 sub cmp_request_params {
-    my ($got, $expected) = @_;
+    my ($got, $expected, $user_cmp) = @_;
     my $got_hash = convert_har_params_to_hash($got);
+    my $compare = generate_comparison_sub($user_cmp);
 
     # Start by assuming that we can't find any of our expected keys
     my @least_missing = keys %{ $expected };
@@ -22,7 +26,18 @@ sub cmp_request_params {
         # either do not exist in actual params, or they do exist but
         # the values aren't the same.
         my @missing = grep {
-            ! ( exists $actual_params->{$_} and $actual_params->{$_} eq $expected->{$_} )
+            if ( exists $actual_params->{$_} ) {
+                my ($got, $exp) = ($actual_params->{$_}, $expected->{$_});
+                if ( $compare->( $got, $exp ) ) {
+                    ''
+                }
+                else {
+                    'missing'
+                }
+            }
+            else {
+                'missing'
+            }
         } keys %{ $expected };
 
         if (scalar @missing < scalar @least_missing) {
@@ -71,7 +86,71 @@ sub convert_har_params_to_hash {
     ];
 
     return $hash;
+}
 
+sub generate_comparison_sub {
+    my ($user_comparison) = @_;
+    my $string_equality = sub { $_[0] eq $_[1] };
+
+    if (! defined $user_comparison) {
+        return $string_equality;
+    }
+
+    my $ref = ref($user_comparison);
+    if ($ref ne 'CODE') {
+        croak 'We expected your custom comparison to be a CODEREF, not a ' . $ref . '!';
+    }
+
+    return sub {
+        my ($got, $expected) = @_;
+
+        return $string_equality->($got, $expected) || $user_comparison->($got, $expected);
+    };
+
+}
+
+
+sub replace_placeholder_values {
+    my ($requests, $assert) = @_;
+
+    my $mutated = { map {
+        my ($key, $value) = ($_, $assert->{$_});
+        if ($value !~ /^ *: */) {
+            $key => $value
+        }
+        else {
+            my $replacement_key = $value;
+            $replacement_key =~ s/^ *: *//;
+
+            my $actual_keys = collect_query_param_keys($requests);
+            my $found_existing_key = scalar(
+                grep { $_ eq $replacement_key } @{ $actual_keys }
+            );
+            if ($found_existing_key) {
+                $key => $assert->{$replacement_key};
+            }
+            else {
+                $key => $value
+            }
+        }
+
+    } keys %{ $assert } };
+
+    return $mutated;
+}
+
+
+sub collect_query_param_keys {
+    my ($requests) = @_;
+
+    my $kv_params = convert_har_params_to_hash($requests);
+
+    my $keys = {};
+    foreach my $param_pairs (@{ $kv_params }) {
+        map { $keys->{$_}++ } keys %{ $param_pairs };
+    }
+
+    return [ sort keys $keys ];
 }
 
 1;
@@ -88,7 +167,7 @@ Browsermob::Proxy::CompareParams - Look for a request with the specified matchin
 
 =head1 VERSION
 
-version 0.10
+version 0.11
 
 =head1 SYNOPSIS
 
@@ -178,6 +257,41 @@ param values:
             query2   "string2"
         }
     ]
+
+=head1 FUNCTIONS
+
+=head2 replace_placeholder_values
+
+Takes two arguments: a HAR or the C<->{log}->{entries}> of a HAR, and
+an assert hashref. If the assert has a value that starts with a colon
+C<:>, and that value exists as a key in any of the HAR's actual query
+parameter pairs, we'll replace the asserted value with the matching
+assert's key.
+
+An example may help make this clear: say you assert the following
+hashref
+
+    $assert = {
+        query => 'param',
+        query2 => ':query'
+    };
+
+and your HAR records a request to a URL with the following params:
+C</endpoint?query=param&query2=param>. We'll return you a new
+C<$assert>:
+
+    $assert = {
+        query => 'param',
+        query2 => 'param'
+    };
+
+=head2 collect_query_param_keys
+
+Given a HAR, or a the entries array of a HAR, we'll return a list of
+all of the keys that were used in any of the query parameters. So if
+your HAR contains a call to C</endpoint?example1&example2> and another
+call to C</endpoint?example2&example3>, we'll return C<[ qw/ example1
+example2 example3 ]>.
 
 =head1 SEE ALSO
 

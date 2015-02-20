@@ -36,4 +36,4 @@ resources:
   bugtracker: https://github.com/gempesaw/Browsermob-Proxy/issues
   homepage: https://github.com/gempesaw/Browsermob-Proxy
   repository: https://github.com/gempesaw/Browsermob-Proxy.git
-version: '0.10'
+version: '0.11'
