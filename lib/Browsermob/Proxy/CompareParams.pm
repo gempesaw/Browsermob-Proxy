@@ -5,7 +5,8 @@ use Carp qw/croak/;
 require Exporter;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/cmp_request_params/;
-our @EXPORT_OK = qw/convert_har_params_to_hash/;
+our @EXPORT_OK = qw/convert_har_params_to_hash
+                    collect_query_param_keys/;
 
 =head1 SYNOPSIS
 
@@ -198,5 +199,28 @@ sub generate_comparison_sub {
 }
 
 
+
+=func collect_query_param_keys
+
+Given a HAR, or a the entries array of a HAR, we'll return a list of
+all of the keys that were used in any of the query parameters. So if
+your HAR contains a call to C</endpoint?example1&example2> and another
+call to C</endpoint?example2&example3>, we'll return C<[ qw/ example1
+example2 example3 ]>.
+
+=cut
+
+sub collect_query_param_keys {
+    my ($requests) = @_;
+
+    my $kv_params = convert_har_params_to_hash($requests);
+
+    my $keys = {};
+    foreach my $param_pairs (@{ $kv_params }) {
+        map { $keys->{$_}++ } keys %{ $param_pairs };
+    }
+
+    return [ sort keys $keys ];
+}
 
 1;

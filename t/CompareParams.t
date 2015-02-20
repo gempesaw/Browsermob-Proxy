@@ -7,7 +7,10 @@ use IO::Socket::INET;
 use LWP::UserAgent;
 use Test::Spec;
 use Test::Deep;
-use Browsermob::Proxy::CompareParams qw/cmp_request_params convert_har_params_to_hash/;
+use Browsermob::Proxy::CompareParams qw/cmp_request_params
+                                        convert_har_params_to_hash
+                                        collect_query_param_keys
+                                       /;
 
 describe 'Param comparison' => sub {
     my ($requests, $assert);
@@ -203,6 +206,40 @@ describe 'Param comparison' => sub {
             $assert = { query => '.*2$' };
             ok( ! cmp_request_params($requests, $assert, $regex_cmp) );
         };
+    };
+};
+
+describe 'Mutating asserts' => sub {
+    my ($requests, $assert);
+    before each => sub {
+        $requests = [{
+            request => {
+                queryString => [{
+                    name => 'query',
+                    value => 'string'
+                }, {
+                    name => 'query2',
+                    value => 'string'
+                }]
+            }
+        }, {
+            request => {
+                queryString => [{
+                    name => 'query2',
+                    value => 'string2'
+                }, {
+                    name => 'query3',
+                    value => 'string3'
+                }]
+            }
+        }];
+
+        $assert = { query => 'string', query2 => ':query' };
+    };
+
+    it 'should collect query param keys properly' => sub {
+        my $query_keys = collect_query_param_keys($requests);
+        cmp_deeply($query_keys, [ 'query', 'query2', 'query3' ]);
     };
 };
 
