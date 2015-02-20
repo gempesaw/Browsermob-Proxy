@@ -10,6 +10,7 @@ use Test::Deep;
 use Browsermob::Proxy::CompareParams qw/cmp_request_params
                                         convert_har_params_to_hash
                                         collect_query_param_keys
+                                        replace_placeholder_values
                                        /;
 
 describe 'Param comparison' => sub {
@@ -207,9 +208,10 @@ describe 'Param comparison' => sub {
             ok( ! cmp_request_params($requests, $assert, $regex_cmp) );
         };
     };
+
 };
 
-describe 'Mutating asserts' => sub {
+describe 'Placeholder values' => sub {
     my ($requests, $assert);
     before each => sub {
         $requests = [{
@@ -241,6 +243,33 @@ describe 'Mutating asserts' => sub {
         my $query_keys = collect_query_param_keys($requests);
         cmp_deeply($query_keys, [ 'query', 'query2', 'query3' ]);
     };
+
+    it 'should pass through a normal assert' => sub {
+        $assert->{query2} = 'string';
+        my $mutated = replace_placeholder_values($requests, $assert);
+        cmp_deeply($mutated, $assert);
+    };
+
+    it 'should mutate an assert with a keyref in it' => sub {
+        my $mutated = replace_placeholder_values($requests, $assert);
+        cmp_deeply($mutated, { query => 'string', query2 => 'string' } );
+    };
+
+    it 'should not mutate assert values that are missing a corresponding actual key' => sub {
+        $assert = { query => ':query_missing' };
+        my $mutated = replace_placeholder_values($requests, $assert);
+        cmp_deeply($mutated, $assert);
+    };
+
+    it 'should pass a mutated assert through cmp_request_params' => sub {
+        my $mutated = replace_placeholder_values($requests, $assert);
+        ok( cmp_request_params($requests, $mutated) );
+    };
+
+    it 'should fail an assert with a placeholder through cmp_request_params' => sub {
+        ok( ! cmp_request_params($requests, $assert) );
+    };
+
 };
 
 SKIP: {

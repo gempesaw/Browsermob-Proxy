@@ -6,6 +6,7 @@ require Exporter;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/cmp_request_params/;
 our @EXPORT_OK = qw/convert_har_params_to_hash
+                    replace_placeholder_values
                     collect_query_param_keys/;
 
 =head1 SYNOPSIS
@@ -198,7 +199,61 @@ sub generate_comparison_sub {
 
 }
 
+=func replace_placeholder_values
 
+Takes two arguments: a HAR or the C<->{log}->{entries}> of a HAR, and
+an assert hashref. If the assert has a value that starts with a colon
+C<:>, and that value exists as a key in any of the HAR's actual query
+parameter pairs, we'll replace the asserted value with the matching
+assert's key.
+
+An example may help make this clear: say you assert the following
+hashref
+
+    $assert = {
+        query => 'param',
+        query2 => ':query'
+    };
+
+and your HAR records a request to a URL with the following params:
+C</endpoint?query=param&query2=param>. We'll return you a new
+C<$assert>:
+
+    $assert = {
+        query => 'param',
+        query2 => 'param'
+    };
+
+=cut
+
+sub replace_placeholder_values {
+    my ($requests, $assert) = @_;
+
+    my $mutated = { map {
+        my ($key, $value) = ($_, $assert->{$_});
+        if ($value !~ /^ *: */) {
+            $key => $value
+        }
+        else {
+            my $replacement_key = $value;
+            $replacement_key =~ s/^ *: *//;
+
+            my $actual_keys = collect_query_param_keys($requests);
+            my $found_existing_key = scalar(
+                grep { $_ eq $replacement_key } @{ $actual_keys }
+            );
+            if ($found_existing_key) {
+                $key => $assert->{$replacement_key};
+            }
+            else {
+                $key => $value
+            }
+        }
+
+    } keys %{ $assert } };
+
+    return $mutated;
+}
 
 =func collect_query_param_keys
 
