@@ -1,8 +1,9 @@
 Revision history for perl module Browsermob::Proxy
 
-0.11 2015-02-19
+0.12 2015-02-19
  - Convince cmp_request_params to take a custom user sub for comparison
  - Add utility functions required for parameter: :parameter cmp
+ - Bug fix for using `keys` on a ref instead of a hash
 
 0.10 2015-02-17
  - Return missing params when cmp_request_params is called in list
