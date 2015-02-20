@@ -6,7 +6,7 @@ Browsermob::Proxy - Perl client for the proxies created by the Browsermob server
 
 # VERSION
 
-version 0.10
+version 0.11
 
 # SYNOPSIS
 
