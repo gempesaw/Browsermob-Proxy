@@ -275,7 +275,7 @@ sub collect_query_param_keys {
         map { $keys->{$_}++ } keys %{ $param_pairs };
     }
 
-    return [ sort keys $keys ];
+    return [ sort keys %{ $keys } ];
 }
 
 1;
