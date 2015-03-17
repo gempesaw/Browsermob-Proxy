@@ -245,6 +245,20 @@ also pass a string to choose your own initial page ref.
     $proxy->new_har;
     $proxy->new_har('Google');
 
+This convenience method is just a helper around the actual endpoint
+method C</create_new_har>; it uses the defaults of not capturing
+headers, request/response bodies, or binary content. If you'd like to
+capture those items, you can use C<create_new_har> as follows:
+
+    $proxy->create_new_har(
+        payload => {
+            initialPageRef => 'payload is optional'
+        },
+        captureHeaders => 'true',
+        captureContent => 'true',
+        captureBinaryContent => 'true'
+    );
+
 =cut
 
 sub new_har {
