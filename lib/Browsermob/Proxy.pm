@@ -375,6 +375,31 @@ sub ua_proxy {
     return ('http', 'http://' . $self->server_addr . ':' . $self->port);
 }
 
+=method set_env_proxy
+
+Export to C<%ENV> the properties of this proxy's port. This can be
+used in tandem with <LWP::UserAgent/env_proxy>. This will set the
+appropriate environment variables, and then your C<$ua> will pick it
+up when its C<env_proxy> method is invoked aftewards. As usual, this
+will create a new HAR unless you deliberately inhibit it.
+
+    $proxy->set_env_proxy;
+    $ua->env_proxy;
+
+In particular, we set C<http_proxy>, C<https_proxy>, and C<ssl_proxy>
+to the appropriate server and port by defining them as keys in C<%ENV>.
+
+=cut
+
+sub set_env_proxy {
+    my ($self, $initiate_manually) = @_;
+    $self->new_har unless $initiate_manually;
+
+    $ENV{http_proxy} = 'http://' . $self->server_addr . ':' . $self->port;
+    $ENV{https_proxy} = 'http://' . $self->server_addr . ':' . $self->port;
+    $ENV{ssl_proxy} = 'http://' . $self->server_addr . ':' . $self->port;
+}
+
 =method add_basic_auth
 
 Set up automatic Basic authentication for a specified domain. Accepts

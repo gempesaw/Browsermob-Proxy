@@ -161,6 +161,20 @@ initialize the har yourself, pass in something truthy.
     my $ua = LWP::UserAgent->new;
     $ua->proxy($proxy->ua_proxy);
 
+## set\_env\_proxy
+
+Export to `%ENV` the properties of this proxy's port. This can be
+used in tandem with <LWP::UserAgent/env\_proxy>. This will set the
+appropriate environment variables, and then your `$ua` will pick it
+up when its `env_proxy` method is invoked aftewards. As usual, this
+will create a new HAR unless you deliberately inhibit it.
+
+    $proxy->set_env_proxy;
+    $ua->env_proxy;
+
+In particular, we set `http_proxy`, `https_proxy`, and `ssl_proxy`
+to the appropriate server and port by defining them as keys in `%ENV`.
+
 ## add\_basic\_auth
 
 Set up automatic Basic authentication for a specified domain. Accepts
