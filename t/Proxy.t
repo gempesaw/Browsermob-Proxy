@@ -226,6 +226,18 @@ BASIC_AUTH: {
     }
 }
 
+EXPORTS: {
+    my $proxy = Browsermob::Proxy->new(
+        server_port => $server_port,
+        port => $port,
+        mock => generate_mock_server()
+    );
+
+    $proxy->set_env_proxy('inhibit');
+    is($ENV{http_proxy}, 'http://127.0.0.1:9091', 'can export our HTTP proxy');
+    is($ENV{https_proxy}, 'http://127.0.0.1:9091', 'can export our HTTPS proxy');
+}
+
 sub generate_mock_server {
     my $mock_port = shift || $port;
 
