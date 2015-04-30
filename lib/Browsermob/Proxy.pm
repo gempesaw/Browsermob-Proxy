@@ -115,6 +115,14 @@ my $spec = {
                 'domain'
             ],
             description => 'Sets automatic basic authentication for the specified domain'
+        },
+        filter_request => {
+            method => 'POST',
+            path => '/:port/filter/request',
+            required_params => [
+                'port'
+            ],
+            description => 'Modify request/payload with javascript'
         }
     }
 };
