@@ -197,6 +197,7 @@ BASIC_AUTH: {
 
   INTEGRATION: {
       SKIP: {
+            skip 'Bug in LittleProxy does not set auth', 1;
             use Net::Ping;
             my $p = Net::Ping->new('tcp', 1);
             skip 'cannot reach webdav.org', 1 unless $p->ping('test.webdav.org');
