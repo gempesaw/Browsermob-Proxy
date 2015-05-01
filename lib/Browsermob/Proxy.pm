@@ -468,8 +468,41 @@ sub add_basic_auth {
         domain => delete $args->{domain},
         payload => $args
     );
-
 }
+
+=method set_request_header ( $header, $value )
+
+Takes two STRINGs as arguments. (Unhelpfully) returns a
+Net::HTTP::Spore::Response. With this method, we will remove the
+specified C<$header> from every request the proxy sees, and replace it
+with the C<$header> C<$value> pair that you pass in.
+
+    $proxy->set_request_header( 'User-Agent', 'superwoman' );
+
+Under the covers, we are using L</filter_request> with a Javascript
+Rhino payload.
+
+=cut
+
+sub set_request_header {
+    my ($self, $header, $value) = @_;
+    croak 'Please pass a ($header, $value) as arguments when setting a header'
+      unless $header and $value;
+
+    $self->_set_header('request', $header, $value);
+}
+
+sub _set_header {
+    my ($self, $type, $header, $value) = @_;
+
+    $self->filter_request(
+        payload => "
+$type.headers().remove('$header');
+$type.headers().add('$header', '$value');
+"
+    );
+}
+
 
 sub DESTROY {
     my $self = shift;
@@ -478,7 +511,6 @@ sub DESTROY {
     eval { $self->delete_proxy; };
     warn $@ if $@ and $self->trace;
 }
-
 1;
 
 =head1 SEE ALSO
