@@ -210,6 +210,14 @@ has _spore => (
     }
 );
 
+around filter_request => sub {
+    my ($orig, $self, @args) = @_;
+    my $client = $self->_spore;
+    $self->_set_middlewares($client, 'text');
+    $orig->($self, @args);
+    $self->_set_middlewares($client, 'json');
+};
+
 sub _set_middlewares {
     my ($self, $client, $type) = @_;
     $client->reset_middlewares;
