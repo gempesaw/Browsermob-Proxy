@@ -42,15 +42,15 @@
       },
       "test" : {
          "requires" : {
-            "DDP" : "0",
-            "Data::Dumper" : "0",
-            "Net::HTTP::Spore::Middleware::Mock" : "0",
+            "File::Basename" : "0",
+            "List::Util" : "0",
             "Net::Ping" : "0",
             "Test::Deep" : "0",
             "Test::LWP::UserAgent" : "0",
             "Test::More" : "0",
             "Test::Spec" : "0",
-            "Try::Tiny" : "0"
+            "Try::Tiny" : "0",
+            "lib" : "0"
          }
       }
    },
@@ -66,6 +66,6 @@
          "web" : "https://github.com/gempesaw/Browsermob-Proxy"
       }
    },
-   "version" : "0.12"
+   "version" : "0.13"
 }
 

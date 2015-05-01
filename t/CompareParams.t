@@ -273,7 +273,7 @@ describe 'Placeholder values' => sub {
 };
 
 SKIP: {
-    my $server = Browsermob::Server->new( port => 8081 );
+    my $server = Browsermob::Server->new;
     my $has_connection = IO::Socket::INET->new(
         PeerAddr => 'www.perl.org',
         PeerPort => 80,

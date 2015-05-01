@@ -1,5 +1,5 @@
 package Browsermob::Proxy;
-$Browsermob::Proxy::VERSION = '0.12';
+$Browsermob::Proxy::VERSION = '0.13';
 # ABSTRACT: Perl client for the proxies created by the Browsermob server
 use Moo;
 use Carp;
@@ -66,6 +66,14 @@ my $spec = {
                 'domain'
             ],
             description => 'Sets automatic basic authentication for the specified domain'
+        },
+        filter_request => {
+            method => 'POST',
+            path => '/:port/filter/request',
+            required_params => [
+                'port'
+            ],
+            description => 'Modify request/payload with javascript'
         }
     }
 };
@@ -114,23 +122,44 @@ has _spore => (
             to_json($self->_spec),
             trace => $self->trace
         );
-        $client->enable('Format::JSON');
 
-        if ($self->has_port) {
-            $client->enable('DefaultParams', default_params => {
-                port => $self->port
-            });
-        }
-
-        if ($self->has_mock) {
-            # The Mock middleware ignores any middleware enabled after
-            # it; make sure to enable everything else first.
-            $client->enable('Mock', tests => $self->mock);
-        }
+        $self->_set_middlewares($client, 'json');
 
         return $client;
     }
 );
+
+around filter_request => sub {
+    my ($orig, $self, @args) = @_;
+    my $client = $self->_spore;
+    $self->_set_middlewares($client, 'text');
+    $orig->($self, @args);
+    $self->_set_middlewares($client, 'json');
+};
+
+sub _set_middlewares {
+    my ($self, $client, $type) = @_;
+    $client->reset_middlewares;
+
+    if ($type eq 'json') {
+        $client->enable('Format::JSON');
+    }
+    elsif ($type eq 'text') {
+        $client->enable('Format::Text');
+    }
+
+    if ($self->has_port) {
+        $client->enable('DefaultParams', default_params => {
+            port => $self->port
+        });
+    }
+
+    if ($self->has_mock) {
+        # The Mock middleware ignores any middleware enabled after
+        # it; make sure to enable everything else first.
+        $client->enable('Mock', tests => $self->mock);
+    }
+}
 
 has _spec => (
     is => 'ro',
@@ -210,6 +239,16 @@ sub ua_proxy {
 }
 
 
+sub set_env_proxy {
+    my ($self, $initiate_manually) = @_;
+    $self->new_har unless $initiate_manually;
+
+    $ENV{http_proxy} = 'http://' . $self->server_addr . ':' . $self->port;
+    $ENV{https_proxy} = 'http://' . $self->server_addr . ':' . $self->port;
+    $ENV{ssl_proxy} = 'http://' . $self->server_addr . ':' . $self->port;
+}
+
+
 sub add_basic_auth {
     my ($self, $args) = @_;
     foreach (qw/domain username password/) {
@@ -221,8 +260,28 @@ sub add_basic_auth {
         domain => delete $args->{domain},
         payload => $args
     );
-
 }
+
+
+sub set_request_header {
+    my ($self, $header, $value) = @_;
+    croak 'Please pass a ($header, $value) as arguments when setting a header'
+      unless $header and $value;
+
+    $self->_set_header('request', $header, $value);
+}
+
+sub _set_header {
+    my ($self, $type, $header, $value) = @_;
+
+    $self->filter_request(
+        payload => "
+$type.headers().remove('$header');
+$type.headers().add('$header', '$value');
+"
+    );
+}
+
 
 sub DESTROY {
     my $self = shift;
@@ -231,7 +290,6 @@ sub DESTROY {
     eval { $self->delete_proxy; };
     warn $@ if $@ and $self->trace;
 }
-
 1;
 
 __END__
@@ -248,7 +306,7 @@ Browsermob::Proxy - Perl client for the proxies created by the Browsermob server
 
 =head1 VERSION
 
-version 0.12
+version 0.13
 
 =head1 SYNOPSIS
 
@@ -338,6 +396,20 @@ also pass a string to choose your own initial page ref.
     $proxy->new_har;
     $proxy->new_har('Google');
 
+This convenience method is just a helper around the actual endpoint
+method C</create_new_har>; it uses the defaults of not capturing
+headers, request/response bodies, or binary content. If you'd like to
+capture those items, you can use C<create_new_har> as follows:
+
+    $proxy->create_new_har(
+        payload => {
+            initialPageRef => 'payload is optional'
+        },
+        captureHeaders => 'true',
+        captureContent => 'true',
+        captureBinaryContent => 'true'
+    );
+
 =head2 har
 
 After creating a proxy and initiating a L<new_har>, you can retrieve
@@ -407,6 +479,20 @@ initialize the har yourself, pass in something truthy.
     my $ua = LWP::UserAgent->new;
     $ua->proxy($proxy->ua_proxy);
 
+=head2 set_env_proxy
+
+Export to C<%ENV> the properties of this proxy's port. This can be
+used in tandem with <LWP::UserAgent/env_proxy>. This will set the
+appropriate environment variables, and then your C<$ua> will pick it
+up when its C<env_proxy> method is invoked aftewards. As usual, this
+will create a new HAR unless you deliberately inhibit it.
+
+    $proxy->set_env_proxy;
+    $ua->env_proxy;
+
+In particular, we set C<http_proxy>, C<https_proxy>, and C<ssl_proxy>
+to the appropriate server and port by defining them as keys in C<%ENV>.
+
 =head2 add_basic_auth
 
 Set up automatic Basic authentication for a specified domain. Accepts
@@ -418,6 +504,18 @@ C<password>. For example,
         username => 'username',
         password => 'password'
     });
+
+=head2 set_request_header ( $header, $value )
+
+Takes two STRINGs as arguments. (Unhelpfully) returns a
+Net::HTTP::Spore::Response. With this method, we will remove the
+specified C<$header> from every request the proxy sees, and replace it
+with the C<$header> C<$value> pair that you pass in.
+
+    $proxy->set_request_header( 'User-Agent', 'superwoman' );
+
+Under the covers, we are using L</filter_request> with a Javascript
+Rhino payload.
 
 =head1 SEE ALSO
 

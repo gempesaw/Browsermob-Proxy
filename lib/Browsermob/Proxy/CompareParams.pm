@@ -1,5 +1,5 @@
 package Browsermob::Proxy::CompareParams;
-$Browsermob::Proxy::CompareParams::VERSION = '0.12';
+$Browsermob::Proxy::CompareParams::VERSION = '0.13';
 # ABSTRACT: Look for a request with the specified matching request params
 use Carp qw/croak/;
 require Exporter;
@@ -167,7 +167,7 @@ Browsermob::Proxy::CompareParams - Look for a request with the specified matchin
 
 =head1 VERSION
 
-version 0.12
+version 0.13
 
 =head1 SYNOPSIS
 
