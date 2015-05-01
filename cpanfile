@@ -10,15 +10,15 @@ requires "strict" => "0";
 requires "warnings" => "0";
 
 on 'test' => sub {
-  requires "DDP" => "0";
-  requires "Data::Dumper" => "0";
-  requires "Net::HTTP::Spore::Middleware::Mock" => "0";
+  requires "File::Basename" => "0";
+  requires "List::Util" => "0";
   requires "Net::Ping" => "0";
   requires "Test::Deep" => "0";
   requires "Test::LWP::UserAgent" => "0";
   requires "Test::More" => "0";
   requires "Test::Spec" => "0";
   requires "Try::Tiny" => "0";
+  requires "lib" => "0";
 };
 
 on 'configure' => sub {

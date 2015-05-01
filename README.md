@@ -201,6 +201,18 @@ as input a HASHREF with the keys `domain`, `username`, and
         password => 'password'
     });
 
+## set\_request\_header ( $header, $value )
+
+Takes two STRINGs as arguments. (Unhelpfully) returns a
+Net::HTTP::Spore::Response. With this method, we will remove the
+specified `$header` from every request the proxy sees, and replace it
+with the `$header` `$value` pair that you pass in.
+
+    $proxy->set_request_header( 'User-Agent', 'superwoman' );
+
+Under the covers, we are using ["filter\_request"](#filter_request) with a Javascript
+Rhino payload.
+
 # SEE ALSO
 
 Please see those modules/websites for more information related to this module.
