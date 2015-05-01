@@ -6,7 +6,6 @@ use Test::More;
 use Try::Tiny;
 use JSON;
 use Browsermob::Proxy;
-use Net::HTTP::Spore::Middleware::Mock;
 
 my $server_port = 63638;
 my $port = 9091;
@@ -245,7 +244,6 @@ sub generate_mock_server {
         '/proxy/' => sub {
             my $req = shift;
             if ($req->method eq 'POST') {
-                use Data::Dumper; use DDP;
                 my $res = {
                     port => $mock_port
                 };
