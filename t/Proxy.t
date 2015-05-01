@@ -8,7 +8,7 @@ use JSON;
 use Browsermob::Proxy;
 
 use File::Basename qw/dirname/;
-use lib dirname(__FILE__) . '/tlib';
+use lib dirname(__FILE__);
 use tlib::MockBrowsermobServer qw/generate_mock_server/;
 
 my $server_port = 63638;

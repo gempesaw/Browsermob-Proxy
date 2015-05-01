@@ -9,7 +9,7 @@ use LWP::UserAgent;
 use Test::Spec;
 
 use File::Basename qw/dirname/;
-use lib dirname(__FILE__) . '/tlib';
+use lib dirname(__FILE__);
 use tlib::MockBrowsermobServer qw/generate_mock_server/;
 
 describe 'Request/Response filters' => sub {
