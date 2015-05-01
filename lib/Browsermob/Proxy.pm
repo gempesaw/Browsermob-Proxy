@@ -195,23 +195,36 @@ has _spore => (
             to_json($self->_spec),
             trace => $self->trace
         );
-        $client->enable('Format::JSON');
 
-        if ($self->has_port) {
-            $client->enable('DefaultParams', default_params => {
-                port => $self->port
-            });
-        }
-
-        if ($self->has_mock) {
-            # The Mock middleware ignores any middleware enabled after
-            # it; make sure to enable everything else first.
-            $client->enable('Mock', tests => $self->mock);
-        }
+        $self->_set_middlewares($client, 'json');
 
         return $client;
     }
 );
+
+sub _set_middlewares {
+    my ($self, $client, $type) = @_;
+    $client->reset_middlewares;
+
+    if ($type eq 'json') {
+        $client->enable('Format::JSON');
+    }
+    elsif ($type eq 'text') {
+        $client->enable('Format::Text');
+    }
+
+    if ($self->has_port) {
+        $client->enable('DefaultParams', default_params => {
+            port => $self->port
+        });
+    }
+
+    if ($self->has_mock) {
+        # The Mock middleware ignores any middleware enabled after
+        # it; make sure to enable everything else first.
+        $client->enable('Mock', tests => $self->mock);
+    }
+}
 
 has _spec => (
     is => 'ro',
