@@ -2,6 +2,8 @@ package Browsermob::Proxy::CompareParams;
 
 # ABSTRACT: Look for a request with the specified matching request params
 use Carp qw/croak/;
+use List::Util qw/none/;
+
 require Exporter;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/cmp_request_params/;
@@ -65,6 +67,9 @@ sub cmp_request_params {
     my $got_hash = convert_har_params_to_hash($got);
     my $compare = generate_comparison_sub($user_cmp);
 
+    # We don't want to assert the presence of keys like "!missing"
+    my ($expected_params, $expected_missing) = _split_expected_asserts( $expected );
+
     # Start by assuming that we can't find any of our expected keys
     my @least_missing = keys %{ $expected };
 
@@ -76,7 +81,7 @@ sub cmp_request_params {
         # the values aren't the same.
         my @missing = grep {
             if ( exists $actual_params->{$_} ) {
-                my ($got, $exp) = ($actual_params->{$_}, $expected->{$_});
+                my ($got, $exp) = ($actual_params->{$_}, $expected_params->{$_});
                 if ( $compare->( $got, $exp ) ) {
                     ''
                 }
@@ -87,8 +92,10 @@ sub cmp_request_params {
             else {
                 'missing'
             }
-        } keys %{ $expected };
+        } keys %{ $expected_params };
 
+        # We need to keep track of the closest match we've found so
+        # far so we can tell the caller about it when we're done
         if (scalar @missing < scalar @least_missing) {
             @least_missing = @missing;
         }
@@ -97,6 +104,10 @@ sub cmp_request_params {
         # match.
         ! ( scalar @missing )
     } @{ $got_hash };
+
+    # We need to filter our @matched requests to skip ones that have
+    # keys that we expect to be missing.
+    @matched = _grep_missing_asserts( \@matched, $expected_missing );
 
     if (wantarray) {
         # In list context, provide the closest match for context on

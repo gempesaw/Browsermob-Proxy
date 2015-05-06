@@ -209,6 +209,63 @@ describe 'Param comparison' => sub {
         };
     };
 
+    describe 'negative assertion' => sub {
+        it 'should pass when the key is missing' => sub {
+            my $assert = {
+                query => 'string',
+                '!missing' => ''
+            };
+
+            ok( cmp_request_params( $requests, $assert) );
+        };
+
+        it 'should pass against any of the requests in the $got' => sub {
+            my $other_assert = {
+                query2 => 'string2',
+                query3 => 'string3',
+                '!missing' => 1,
+                '!missing2' => 2
+            };
+
+            ok( cmp_request_params( $requests, $other_assert ) );
+        };
+
+
+        it 'should fail when the key is present' => sub {
+            my $single_request = [ shift @$requests ];
+            my $assert = {
+                '!query' => 'string'
+            };
+
+            ok( ! cmp_request_params( $single_request, $assert) );
+        };
+
+        it 'should pass if two requests are present and one of them matches' => sub {
+            my $assert = {
+                '!query' => 'string'
+            };
+
+            ok( cmp_request_params( $requests, $assert) );
+        };
+
+        it 'should fail if two requests are present and neither of them match' => sub {
+            my $assert = {
+                '!query' => 'string',
+                '!query2' => ''
+            };
+
+            ok( ! cmp_request_params( $requests, $assert) );
+        };
+
+        it 'should pass regardless of the values' => sub {
+            my $assert = {
+                '!missing' => '',
+                '!also missing' => 'whee'
+            };
+
+             ok( cmp_request_params( $requests, $assert) );
+        };
+    };
 };
 
 describe 'Placeholder values' => sub {
