@@ -111,6 +111,43 @@ sub cmp_request_params {
     }
 }
 
+sub _split_expected_asserts {
+    my ( $expected ) = @_;
+
+    my ($present, $missing) = ( {}, {} );
+    foreach my $key (keys %$expected) {
+        if ($key =~ /^!/) {
+            $missing->{$key} = $expected->{$key};
+        }
+        else {
+            $present->{$key} = $expected->{$key};
+        }
+    }
+
+    return ($present, $missing);
+}
+
+sub _grep_missing_asserts {
+    my ( $got, $expected_missing ) = @_;
+
+    my @missing_keys = map { s/^!//; $_ } keys %$expected_missing;
+
+    my @matched = grep {
+        my @got_keys = keys %$_;
+
+        my $ret = 1;
+        foreach my $expected_missing (@missing_keys) {
+            $ret = $ret && none {
+                $_ eq $expected_missing
+            } @got_keys;
+        }
+
+        $ret;
+    } @{ $got };
+
+    return @matched;
+}
+
 =method convert_har_params_to_hash
 
 This isn't exported by default; we wouldn't expect that you'd need to
