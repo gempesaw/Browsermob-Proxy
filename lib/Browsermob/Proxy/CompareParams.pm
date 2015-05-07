@@ -80,10 +80,10 @@ sub cmp_request_params {
             # Negative asserts ( "!missing", "!not_equal:to_this" )
             # need to be handled differently
             if ( _is_negative_assert($key) ) {
-                _assert_negative_key($key, $actual_params, $expected, $compare);
+                _assert_negative_kv($key, $expected->{$key}, $actual_params, $compare);
             }
             else {
-                _assert_positive_key($key, $actual_params, $expected, $compare);
+                _assert_positive_kv($key, $expected->{$key}, $actual_params, $compare);
             }
         } keys %{ $expected };
 
@@ -117,12 +117,13 @@ sub _is_negative_assert {
     return $key =~ /^!/;
 }
 
-sub _assert_negative_key {
-    my ($key, $actual_params, $expected_params, $compare) = @_;
+sub _assert_negative_kv {
+    my ($key, $expected, $actual_params, $compare) = @_;
 
     if ($expected_params->{$key} eq '') {
         return _assert_missing_key( $key, $actual_params );
     }
+}
 }
 
 sub _assert_missing_key {
@@ -145,8 +146,8 @@ sub _assert_missing_key {
     }
 }
 
-sub _assert_positive_key {
-    my ($key, $actual_params, $expected_params, $compare) = @_;
+sub _assert_positive_kv {
+    my ($key, $expected, $actual_params, $compare) = @_;
 
     # Start off assuming that the expected key is missing from the
     # actual params.
@@ -154,10 +155,10 @@ sub _assert_positive_key {
 
     # The expected key must exist in the actual params...
     if ( exists $actual_params->{$key} ) {
-        my ($got, $exp) = ($actual_params->{$key}, $expected_params->{$key});
+        my $got = $actual_params->{$key};
         # and the expected key's value must match the actual param's
         # key's value.
-        if ( $compare->( $got, $exp ) ) {
+        if ( $compare->( $got, $expected ) ) {
             $ret = '';
         }
     }
