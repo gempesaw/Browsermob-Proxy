@@ -111,10 +111,39 @@ sub cmp_request_params {
     }
 }
 
+sub _is_negative_assert {
+    my ($key) = @_;
 
-
+    return $key =~ /^!/;
 }
 
+sub _assert_negative_key {
+    my ($key, $actual_params, $expected_params, $compare) = @_;
+
+    if ($expected_params->{$key} eq '') {
+        return _assert_missing_key( $key, $actual_params );
+    }
+}
+
+sub _assert_missing_key {
+    my ($key, $actual_params) = @_;
+    # The key looks like "!query", but obviously we are interested in
+    # "query".
+    my $actual_key = $key;
+    $actual_key =~ s/^!//;
+
+    if (exists $actual_params->{$actual_key}) {
+        # We're asserting that the key is not present. Since we've
+        # found it, that's bad; the grep up in cmp_request_params
+        # expects truthy values to indicate something bad.
+        return 'found';
+    }
+    else {
+        # The key isn't in the actual params, so we're good! False
+        # values indicate that everything is okay.
+        return '';
+    }
+}
 
 sub _assert_positive_key {
     my ($key, $actual_params, $expected_params, $compare) = @_;
