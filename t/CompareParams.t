@@ -374,7 +374,7 @@ SKIP: {
     );
 
     skip 'No server found for e2e tests', 2
-      unless $server->_is_listening(5) and $has_connection and 0;
+      unless $server->_is_listening(5) and $has_connection;
 
     describe 'E2E Comparing params' => sub {
         my ($ua, $proxy, $har);
