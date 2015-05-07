@@ -1,5 +1,5 @@
 package Browsermob::Proxy;
-$Browsermob::Proxy::VERSION = '0.13';
+$Browsermob::Proxy::VERSION = '0.14';
 # ABSTRACT: Perl client for the proxies created by the Browsermob server
 use Moo;
 use Carp;
@@ -306,7 +306,7 @@ Browsermob::Proxy - Perl client for the proxies created by the Browsermob server
 
 =head1 VERSION
 
-version 0.13
+version 0.14
 
 =head1 SYNOPSIS
 
@@ -353,6 +353,20 @@ This module is a Perl client interface to interact with the server and
 its proxies. It uses L<Net::HTTP::Spore>. You can use
 L<Browsermob::Server> to manage the server itself in addition to using
 this module to handle the proxies.
+
+=head2 INSTALLATION
+
+We depend on L<Net::HTTP::Spore> to set up our communication with the
+Browsermob server. Unfortunately, there hasn't been a recent release
+and due to breaking changes in new versions of its dependencies, you
+might run in to problems installing its current CPAN version
+v0.06. And, thus installing this module may be difficult.
+
+We're using a fork of L<Net::HTTP::Spore> that is kept slightly ahead
+of master with the bug fixes merged in; installation via
+L<App::cpanminus> looks like:
+
+    cpanm git://github.com/gempesaw/net-http-spore.git@build/master
 
 =head1 ATTRIBUTES
 

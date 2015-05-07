@@ -1,5 +1,8 @@
 Revision history for perl module Browsermob::Proxy
 
+0.14 2015-05-07
+ - Add negative assets on request parameters
+
 0.13 2015-05-01
  - Add endpoint for filtering requests via LittleProxy
 

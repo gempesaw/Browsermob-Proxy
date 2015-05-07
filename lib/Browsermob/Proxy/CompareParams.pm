@@ -1,7 +1,8 @@
 package Browsermob::Proxy::CompareParams;
-$Browsermob::Proxy::CompareParams::VERSION = '0.13';
+$Browsermob::Proxy::CompareParams::VERSION = '0.14';
 # ABSTRACT: Look for a request with the specified matching request params
 use Carp qw/croak/;
+
 require Exporter;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/cmp_request_params/;
@@ -26,20 +27,19 @@ sub cmp_request_params {
         # either do not exist in actual params, or they do exist but
         # the values aren't the same.
         my @missing = grep {
-            if ( exists $actual_params->{$_} ) {
-                my ($got, $exp) = ($actual_params->{$_}, $expected->{$_});
-                if ( $compare->( $got, $exp ) ) {
-                    ''
-                }
-                else {
-                    'missing'
-                }
+            my $key = $_;
+            # Negative asserts ( "!missing", "!not_equal:to_this" )
+            # need to be handled differently
+            if ( _is_negative_assert($key) ) {
+                _assert_negative_kv($key, $expected->{$key}, $actual_params, $compare);
             }
             else {
-                'missing'
+                _assert_positive_kv($key, $expected->{$key}, $actual_params, $compare);
             }
         } keys %{ $expected };
 
+        # We need to keep track of the closest match we've found so
+        # far so we can tell the caller about it when we're done
         if (scalar @missing < scalar @least_missing) {
             @least_missing = @missing;
         }
@@ -60,6 +60,89 @@ sub cmp_request_params {
     else {
         return scalar @matched;
     }
+}
+
+sub _is_negative_assert {
+    my ($key) = @_;
+
+    return $key =~ /^!/;
+}
+
+sub _assert_negative_kv {
+    my ($key, $expected, $actual_params, $compare) = @_;
+
+    # Negative asserts come in two flavors: either the key must not
+    # exist at all, or the key must exist, but its value cannot match
+    # the expected.
+
+    if ($expected eq '') {
+        return _assert_missing_key( $key, $actual_params );
+    }
+    else {
+        return _assert_different_value( $key, $expected, $actual_params, $compare );
+    }
+}
+
+sub _assert_different_value {
+    my ($key, $expected, $actual_params, $compare) = @_;
+    my $actual_key = $key;
+    $actual_key =~ s/^!//;
+
+    if ( exists $actual_params->{$actual_key} ) {
+        # At this point, we know the key exists, and we just want to
+        # make sure we _dont_ match our assertion. Which is to say,
+        # the exact opposite of a positive kv assertion.
+        return ! _assert_positive_kv( $actual_key, $expected, $actual_params, $compare);
+    }
+    else {
+        # An assert like "!missing: not this" requires that the key
+        # exists and is not equal to the value. If the key does not
+        # even exist, that is bad; we assert that it must exist.
+        return 'needs to exist';
+    }
+
+    return $ret;
+}
+
+sub _assert_missing_key {
+    my ($key, $actual_params) = @_;
+    # The key looks like "!query", but the actual key we are
+    # interested in is "query".
+    my $actual_key = $key;
+    $actual_key =~ s/^!//;
+
+    if (exists $actual_params->{$actual_key}) {
+        # We're asserting that the key is not present. Since we've
+        # found it, that's bad; the grep up in cmp_request_params
+        # expects truthy values to indicate something bad.
+        return 'found';
+    }
+    else {
+        # The key isn't in the actual params, so we're good! False
+        # values indicate that everything is okay.
+        return '';
+    }
+}
+
+sub _assert_positive_kv {
+    my ($key, $expected, $actual_params, $compare) = @_;
+
+    # Start off assuming that the expected key is missing from the
+    # actual params.
+    my $ret = 'missing';
+
+    # The expected key must exist in the actual params...
+    if ( exists $actual_params->{$key} ) {
+        my $got = $actual_params->{$key};
+        # and the expected key's value must match the actual param's
+        # key's value.
+        if ( $compare->( $got, $expected ) ) {
+            $ret = '';
+        }
+    }
+
+    # Otherwise, we've initialized $ret as missing so we're good to go.
+    return $ret;
 }
 
 
@@ -167,7 +250,7 @@ Browsermob::Proxy::CompareParams - Look for a request with the specified matchin
 
 =head1 VERSION
 
-version 0.13
+version 0.14
 
 =head1 SYNOPSIS
 
