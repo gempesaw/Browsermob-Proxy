@@ -50,6 +50,20 @@ its proxies. It uses [Net::HTTP::Spore](https://metacpan.org/pod/Net::HTTP::Spor
 [Browsermob::Server](https://metacpan.org/pod/Browsermob::Server) to manage the server itself in addition to using
 this module to handle the proxies.
 
+## INSTALLATION
+
+We depend on [Net::HTTP::Spore](https://metacpan.org/pod/Net::HTTP::Spore) to set up our communication with the
+Browsermob server. Unfortunately, there hasn't been a recent release
+and due to breaking changes in new versions of its dependencies, you
+might run in to problems installing its current CPAN version
+v0.06. And, thus installing this module may be difficult.
+
+We're using a fork of [Net::HTTP::Spore](https://metacpan.org/pod/Net::HTTP::Spore) that is kept slightly ahead
+of master with the bug fixes merged in; installation via
+[App::cpanminus](https://metacpan.org/pod/App::cpanminus) looks like:
+
+    cpanm git://github.com/gempesaw/net-http-spore.git@build/master
+
 # ATTRIBUTES
 
 ## server\_addr
