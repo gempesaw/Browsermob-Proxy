@@ -76,19 +76,16 @@ sub cmp_request_params {
         # either do not exist in actual params, or they do exist but
         # the values aren't the same.
         my @missing = grep {
-            if ( exists $actual_params->{$_} ) {
-                my ($got, $exp) = ($actual_params->{$_}, $expected_params->{$_});
-                if ( $compare->( $got, $exp ) ) {
-                    ''
-                }
-                else {
-                    'missing'
-                }
+            my $key = $_;
+            # Negative asserts ( "!missing", "!not_equal:to_this" )
+            # need to be handled differently
+            if ( _is_negative_assert($key) ) {
+                _assert_negative_key($key, $actual_params, $expected, $compare);
             }
             else {
-                'missing'
+                _assert_positive_key($key, $actual_params, $expected, $compare);
             }
-        } keys %{ $expected_params };
+        } keys %{ $expected };
 
         # We need to keep track of the closest match we've found so
         # far so we can tell the caller about it when we're done
@@ -119,10 +116,25 @@ sub cmp_request_params {
 }
 
 
+sub _assert_positive_key {
+    my ($key, $actual_params, $expected_params, $compare) = @_;
 
+    # Start off assuming that the expected key is missing from the
+    # actual params.
+    my $ret = 'missing';
 
+    # The expected key must exist in the actual params...
+    if ( exists $actual_params->{$key} ) {
+        my ($got, $exp) = ($actual_params->{$key}, $expected_params->{$key});
+        # and the expected key's value must match the actual param's
+        # key's value.
+        if ( $compare->( $got, $exp ) ) {
+            $ret = '';
         }
+    }
 
+    # Otherwise, we've initialized $ret as missing so we're good to go.
+    return $ret;
 }
 
 =method convert_har_params_to_hash
