@@ -120,16 +120,43 @@ sub _is_negative_assert {
 sub _assert_negative_kv {
     my ($key, $expected, $actual_params, $compare) = @_;
 
-    if ($expected_params->{$key} eq '') {
+    # Negative asserts come in two flavors: either the key must not
+    # exist at all, or the key must exist, but its value cannot match
+    # the expected.
+
+    if ($expected eq '') {
         return _assert_missing_key( $key, $actual_params );
     }
+    else {
+        return _assert_different_value( $key, $expected, $actual_params, $compare );
+    }
 }
+
+sub _assert_different_value {
+    my ($key, $expected, $actual_params, $compare) = @_;
+    my $actual_key = $key;
+    $actual_key =~ s/^!//;
+
+    if ( exists $actual_params->{$actual_key} ) {
+        # At this point, we know the key exists, and we just want to
+        # make sure we _dont_ match our assertion. Which is to say,
+        # the exact opposite of a positive kv assertion.
+        return ! _assert_positive_kv( $actual_key, $expected, $actual_params, $compare);
+    }
+    else {
+        # An assert like "!missing: not this" requires that the key
+        # exists and is not equal to the value. If the key does not
+        # even exist, that is bad; we assert that it must exist.
+        return 'needs to exist';
+    }
+
+    return $ret;
 }
 
 sub _assert_missing_key {
     my ($key, $actual_params) = @_;
-    # The key looks like "!query", but obviously we are interested in
-    # "query".
+    # The key looks like "!query", but the actual key we are
+    # interested in is "query".
     my $actual_key = $key;
     $actual_key =~ s/^!//;
 

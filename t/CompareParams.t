@@ -244,7 +244,62 @@ describe 'Param comparison' => sub {
                 '!query' => ''
             };
 
-            ok( cmp_request_params( $requests, $assert) );
+            ok( cmp_request_params( $requests, $assert ) );
+        };
+
+        it 'should pass on a negative asserts with an incorrect value' => sub {
+            my $single_request = [ shift @$requests ];
+            my $assert = {
+                '!query' => 'superwoman'
+            };
+
+            ok( cmp_request_params( $single_request, $assert ) );
+        };
+
+        it 'should pass on a negative value assert that exists in one of the request' => sub {
+            my $assert = {
+                '!query2' => 'superwoman',
+                '!query3' => 'superwoman',
+            };
+
+            ok( cmp_request_params( $requests, $assert ) );
+        };
+
+
+        it 'should fail if the key value pair exists' => sub {
+            my $single_request = [ shift @$requests ];
+            my $assert = {
+                '!query' => 'string'
+            };
+
+            ok( ! cmp_request_params( $single_request, $assert ) );
+        };
+
+        it 'should fail if the key does not exist' => sub {
+            my $assert = {
+                '!missing key' => 'must exist'
+            };
+
+            ok( ! cmp_request_params( $requests, $assert ) );
+        };
+
+        it 'should fail on a negative value assert that exists in the requests' => sub {
+            my $assert = {
+                '!query' => 'string'
+            };
+
+            ok( ! cmp_request_params( $requests, $assert ) );
+        };
+
+        it 'should pass a complicated combination of positive negative asserts' => sub {
+            my $assert = {
+                query2 => 'string2',
+                query3 => 'string3',
+                '!query3' => 'superman',
+                '!missing key' => ''
+            };
+
+            ok( cmp_request_params( $requests, $assert ) );
         };
     }
 };
