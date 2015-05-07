@@ -2,7 +2,6 @@ package Browsermob::Proxy::CompareParams;
 
 # ABSTRACT: Look for a request with the specified matching request params
 use Carp qw/croak/;
-use List::Util qw/none/;
 
 require Exporter;
 our @ISA = qw/Exporter/;
@@ -67,9 +66,6 @@ sub cmp_request_params {
     my $got_hash = convert_har_params_to_hash($got);
     my $compare = generate_comparison_sub($user_cmp);
 
-    # We don't want to assert the presence of keys like "!missing"
-    my ($expected_params, $expected_missing) = _split_expected_asserts( $expected );
-
     # Start by assuming that we can't find any of our expected keys
     my @least_missing = keys %{ $expected };
 
@@ -105,10 +101,6 @@ sub cmp_request_params {
         ! ( scalar @missing )
     } @{ $got_hash };
 
-    # We need to filter our @matched requests to skip ones that have
-    # keys that we expect to be missing.
-    @matched = _grep_missing_asserts( \@matched, $expected_missing );
-
     if (wantarray) {
         # In list context, provide the closest match for context on
         # the caller's side
@@ -122,41 +114,15 @@ sub cmp_request_params {
     }
 }
 
-sub _split_expected_asserts {
-    my ( $expected ) = @_;
 
-    my ($present, $missing) = ( {}, {} );
-    foreach my $key (keys %$expected) {
-        if ($key =~ /^!/) {
-            $missing->{$key} = $expected->{$key};
-        }
-        else {
-            $present->{$key} = $expected->{$key};
-        }
-    }
 
-    return ($present, $missing);
 }
 
-sub _grep_missing_asserts {
-    my ( $got, $expected_missing ) = @_;
 
-    my @missing_keys = map { s/^!//; $_ } keys %$expected_missing;
 
-    my @matched = grep {
-        my @got_keys = keys %$_;
 
-        my $ret = 1;
-        foreach my $expected_missing (@missing_keys) {
-            $ret = $ret && none {
-                $_ eq $expected_missing
-            } @got_keys;
         }
 
-        $ret;
-    } @{ $got };
-
-    return @matched;
 }
 
 =method convert_har_params_to_hash
