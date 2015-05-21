@@ -518,13 +518,14 @@ $type.headers().add('$header', '$value');
 }
 
 
-sub DESTROY {
-    my $self = shift;
-    # Suppress warnings around automatic proxy deletion unless we're
-    # in debug mode
-    eval { $self->delete_proxy; };
-    warn $@ if $@ and $self->trace;
+
+sub DEMOLISH {
+    my ($self, $gd) = @_;
+    return if $gd;
+
+    $self->delete_proxy;
 }
+
 1;
 
 =head1 SEE ALSO
