@@ -141,6 +141,9 @@ my $spec = {
         set_timeout => {
             method => 'PUT',
             path => '/:port/timeout',
+            required_params => [
+                'port',
+            ],
             optional_params => [
                 'requestTimeout',
                 'readTimeout',
@@ -283,9 +286,7 @@ sub BUILD {
 
     unless ($self->has_port) {
         $self->port($res->body->{port});
-        $self->_spore->enable('DefaultParams', default_params => {
-            port => $self->port
-        });
+        $self->_set_middlewares( $self->_spore, 'json' );
     }
 }
 
