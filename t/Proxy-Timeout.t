@@ -3,7 +3,6 @@
 use strict;
 use warnings;
 use Test::Spec;
-use Test::Fatal;
 
 use Browsermob::Proxy;
 use File::Basename qw/dirname/;
@@ -36,10 +35,11 @@ describe 'Proxy Timeouts' => sub {
     };
 
     it 'should set without throwing' => sub {
-        is( exception { $proxy->set_timeout(
+        eval { $proxy->set_timeout(
             requestTimeout => 12345,
             dnsCacheTimeout => 54321
-        ) }, undef );
+        ) };
+        ok( ! $@ );
     };
 
     it 'should go to /proxy/:port/timeout' => sub {
