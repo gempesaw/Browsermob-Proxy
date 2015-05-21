@@ -27,6 +27,11 @@ describe 'BMP Server' => sub {
         is( $server->find_open_port(0..10), 0 );
     };
 
+    it 'should always choose a port in the range' => sub {
+        mock_get_proxies( $tua, [ 1, 2, 3 ] );
+
+        is( $server->find_open_port( 10 .. 20 ), 10 );
+    };
 
     # Skip this e2e test since we don't keep a copy of the browsermob
     # binary in the repo

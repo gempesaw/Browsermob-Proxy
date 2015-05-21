@@ -192,7 +192,7 @@ sub find_open_port {
         $count->{$_}++;
     }
 
-    foreach (sort keys %$count) {
+    foreach (sort @range) {
         if ($count->{$_} == 1) {
             return $_;
         }
