@@ -1,5 +1,5 @@
 package Browsermob::Server;
-$Browsermob::Server::VERSION = '0.15';
+$Browsermob::Server::VERSION = '0.1501';
 # ABSTRACT: Perl client to control the Browsermob Proxy server
 use strict;
 use warnings;
@@ -107,7 +107,7 @@ sub find_open_port {
         $count->{$_}++;
     }
 
-    foreach (sort keys %$count) {
+    foreach (sort @range) {
         if ($count->{$_} == 1) {
             return $_;
         }
@@ -142,7 +142,7 @@ Browsermob::Server - Perl client to control the Browsermob Proxy server
 
 =head1 VERSION
 
-version 0.15
+version 0.1501
 
 =head1 SYNOPSIS
 

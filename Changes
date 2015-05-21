@@ -1,5 +1,8 @@
 Revision history for perl module Browsermob::Proxy
 
+0.1501 2015-05-21
+ - Fix bug where find_open_port could return outside the range
+
 0.15 2015-05-21
  - Add endpoint for managing timeouts on proxies
  - Check for $gd during DEMOLISH to handle warnings properly

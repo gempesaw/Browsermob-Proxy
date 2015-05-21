@@ -1,5 +1,5 @@
 package Browsermob::Proxy;
-$Browsermob::Proxy::VERSION = '0.15';
+$Browsermob::Proxy::VERSION = '0.1501';
 # ABSTRACT: Perl client for the proxies created by the Browsermob server
 use Moo;
 use Carp;
@@ -320,7 +320,7 @@ Browsermob::Proxy - Perl client for the proxies created by the Browsermob server
 
 =head1 VERSION
 
-version 0.15
+version 0.1501
 
 =head1 SYNOPSIS
 

@@ -2,69 +2,66 @@
 
 use strict;
 use warnings;
-use Test::More;
-use Test::LWP::UserAgent;
 use Browsermob::Server;
-use Net::Ping;
+use JSON;
+use Test::Spec;
+use Test::LWP::UserAgent;
 
-SKIP: {
-    my $binary = 'bin/browsermob-proxy';
-    skip "Skipping server tests; no binary found", 2 unless -f $binary;
+describe 'BMP Server' => sub {
+    my ($server, $tua);
 
-    my $p = Net::Ping->new();
-    my $port = 63637;
-    $p->port_number($port);
+    before each => sub {
+        $tua = Test::LWP::UserAgent->new;
+        $server = Browsermob::Server->new( ua => $tua );
+    };
 
-    my $bmp = Browsermob::Server->new(
-        path => $binary,
-        port => $port
-    );
+    it 'should find the lowest available port' => sub {
+        mock_get_proxies( $tua, [ 0, 2 ] );
 
-    isa_ok($bmp, 'Browsermob::Server');
+        is( $server->find_open_port(0..10) , 1);
+    };
 
-    $bmp->start unless -f $binary;
-    ok($p->ping('localhost'), 'server started!');
-}
+    it 'should choose the first port when all are open' => sub {
+        mock_get_proxies( $tua, [ ] );
 
-FIND_OPEN_PORT: {
-    my $tua = Test::LWP::UserAgent->new;
+        is( $server->find_open_port(0..10), 0 );
+    };
+
+    it 'should always choose a port in the range' => sub {
+        mock_get_proxies( $tua, [ 1, 2, 3 ] );
+
+        is( $server->find_open_port( 10 .. 20 ), 10 );
+    };
+
+    # Skip this e2e test since we don't keep a copy of the browsermob
+    # binary in the repo
+    xit 'should start a server' => sub {
+        my $binary = 'bin/browsermob-proxy';
+        my $port = 8080;
+
+        my $server = Browsermob::Server->new(
+            path => $binary,
+            port => $port
+        );
+
+        ok( $server->_is_listening );
+    };
+
+};
+
+sub mock_get_proxies {
+    my ($tua, $used_ports) = @_;
+
+    my @proxy_list = map { { port => $_ } } @$used_ports;
+
     $tua->map_response(
         qr/proxy/,
         HTTP::Response->new(
             '200',
             'OK',
             ['Content-Type' => 'text/json'],
-            '{"proxyList":[{"port":0},{"port":2}]}'
+            '{"proxyList":' . to_json(\@proxy_list) . '}'
         ));
-
-    my $bmp = Browsermob::Server->new(
-        ua => $tua
-    );
-
-    my $open_port = $bmp->find_open_port(0..10);
-    cmp_ok($open_port, 'eq', 1, 'can find the lowest open port');
-
-    my $tua2 = Test::LWP::UserAgent->new;
-    $tua2->map_response(
-        qr/proxy/,
-        HTTP::Response->new(
-            '200',
-            'OK',
-            ['Content-Type' => 'text/json'],
-            '{"proxyList":[]}'
-        ));
-
-    $bmp = Browsermob::Server->new(
-        ua => $tua2
-    );
-
-    $open_port = $bmp->find_open_port(0..10);
-    cmp_ok($open_port, 'eq', 0, 'choose the first port when none are open');
 }
 
-
-
-# $bmp->stop;
-# ok(not $p->ping('localhost', 1), 'server stopped!');
-
-done_testing;
+runtests;
