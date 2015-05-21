@@ -137,6 +137,17 @@ my $spec = {
                 'port'
             ],
             description => 'Modify request/payload with javascript'
+        },
+        set_timeout => {
+            method => 'PUT',
+            path => '/:port/timeout',
+            optional_params => [
+                'requestTimeout',
+                'readTimeout',
+                'connectionTimeout',
+                'dnsCacheTimeout'
+            ],
+            description => 'Handles different proxy timeouts'
         }
     }
 };
@@ -517,6 +528,41 @@ $type.headers().add('$header', '$value');
     );
 }
 
+=method set_timeout ( $timeoutType => $milliseconds )
+
+Set different time outs on the instantiated proxy. You can set
+multiple timeouts at once, if you like.
+
+    $proxy->timeout(
+        requestTimeout => 5000,
+        readTimeout => 6000
+    );
+
+=item requestTimeout
+
+Request timeout in milliseconds. A timeout value of -1 is interpreted
+as infinite timeout. It equals -1 by default.
+
+=item readTimeout
+
+Read timeout is the timeout for waiting for data or, put differently,
+a maximum period inactivity between two consecutive data packets. A
+timeout value of zero is interpreted as an infinite timeout. It equals
+60000 by default.
+
+=item connectionTimeout
+
+Determines the timeout in milliseconds until a connection is
+established. A timeout value of zero is interpreted as an infinite
+timeout. It eqauls 60000 by default.
+
+=item dnsCacheTimeout
+
+Sets the maximum length of time that records will be stored in this
+Cache. A nonpositive value disables this feature (that is, sets no
+limit). It equals 0 by default.
+
+=cut
 
 =method delete_proxy
 
