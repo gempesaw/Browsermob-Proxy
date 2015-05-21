@@ -1,5 +1,5 @@
 package Browsermob::Proxy;
-$Browsermob::Proxy::VERSION = '0.14';
+$Browsermob::Proxy::VERSION = '0.15';
 # ABSTRACT: Perl client for the proxies created by the Browsermob server
 use Moo;
 use Carp;
@@ -74,6 +74,20 @@ my $spec = {
                 'port'
             ],
             description => 'Modify request/payload with javascript'
+        },
+        set_timeout => {
+            method => 'PUT',
+            path => '/:port/timeout',
+            required_params => [
+                'port',
+            ],
+            optional_params => [
+                'requestTimeout',
+                'readTimeout',
+                'connectionTimeout',
+                'dnsCacheTimeout'
+            ],
+            description => 'Handles different proxy timeouts'
         }
     }
 };
@@ -177,9 +191,7 @@ sub BUILD {
 
     unless ($self->has_port) {
         $self->port($res->body->{port});
-        $self->_spore->enable('DefaultParams', default_params => {
-            port => $self->port
-        });
+        $self->_set_middlewares( $self->_spore, 'json' );
     }
 }
 
@@ -283,13 +295,15 @@ $type.headers().add('$header', '$value');
 }
 
 
-sub DESTROY {
-    my $self = shift;
-    # Suppress warnings around automatic proxy deletion unless we're
-    # in debug mode
-    eval { $self->delete_proxy; };
+
+sub DEMOLISH {
+    my ($self, $gd) = @_;
+    return if $gd;
+
+    eval { $self->delete_proxy };
     warn $@ if $@ and $self->trace;
 }
+
 1;
 
 __END__
@@ -306,7 +320,7 @@ Browsermob::Proxy - Perl client for the proxies created by the Browsermob server
 
 =head1 VERSION
 
-version 0.14
+version 0.15
 
 =head1 SYNOPSIS
 
@@ -530,6 +544,71 @@ with the C<$header> C<$value> pair that you pass in.
 
 Under the covers, we are using L</filter_request> with a Javascript
 Rhino payload.
+
+=head2 set_timeout ( $timeoutType => $milliseconds )
+
+Set different time outs on the instantiated proxy. You can set
+multiple timeouts at once, if you like.
+
+    $proxy->timeout(
+        requestTimeout => 5000,
+        readTimeout => 6000
+    );
+
+=over 4
+
+=item *
+
+requestTimeout
+
+Request timeout in milliseconds. A timeout value of -1 is interpreted
+as infinite timeout. It equals -1 by default.
+
+=item *
+
+readTimeout
+
+Read timeout is the timeout for waiting for data or, put differently,
+a maximum period inactivity between two consecutive data packets. A
+timeout value of zero is interpreted as an infinite timeout. It equals
+60000 by default.
+
+=item *
+
+connectionTimeout
+
+Determines the timeout in milliseconds until a connection is
+established. A timeout value of zero is interpreted as an infinite
+timeout. It eqauls 60000 by default.
+
+=item *
+
+dnsCacheTimeout
+
+Sets the maximum length of time that records will be stored in this
+Cache. A nonpositive value disables this feature (that is, sets no
+limit). It equals 0 by default.
+
+=back
+
+=head2 delete_proxy
+
+Delete the proxy off of the server, shutting down the port. Although
+we do try to do this in our DEMOLISH method, we can't do anything if
+the C<$proxy> object is kept around during global destruction. If
+you're noticing that your BMP server has leftover proxies, you should
+start either explicitly C<undef>ing the `$proxy` object or invoking
+this method.
+
+    # calls ->delete_proxy in our DEMOLISH method, explicitly not
+    # during global destruction!
+    undef $proxy;
+
+    # manually delete the proxy from the BMP server
+    $proxy->delete_proxy;
+
+After deleting the proxy, invoking any other method will probably lead
+to a C<die> from inside the Net::HTTP::Spore module somewhere.
 
 =head1 SEE ALSO
 

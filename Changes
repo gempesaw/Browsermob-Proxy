@@ -1,5 +1,10 @@
 Revision history for perl module Browsermob::Proxy
 
+0.15 2015-05-21
+ - Add endpoint for managing timeouts on proxies
+ - Check for $gd during DEMOLISH to handle warnings properly
+ - Convert more tests over to Test::Spec
+
 0.14 2015-05-07
  - Add negative assets on request parameters
 

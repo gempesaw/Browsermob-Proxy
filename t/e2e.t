@@ -1,41 +1,39 @@
-#! /usr/bin/perl
-
 use strict;
 use warnings;
-use JSON;
-use Net::Ping;
-use Test::More;
-use Browsermob::Proxy;
+use Test::Spec;
+use Browsermob::Server;
 
-my $har = {};
-my $server_port = 63638;
-
-if (is_proxy_server_running($server_port)) {
-    my $proxy = Browsermob::Proxy->new(
-        server_port => $server_port
+SKIP: {
+    my $server = Browsermob::Server->new;
+    my $has_connection = IO::Socket::INET->new(
+        PeerAddr => 'www.google.com',
+        PeerPort => 80,
+        Timeout => 5
     );
 
-    $proxy->new_har;
+    skip 'No server found for e2e tests', 2
+      unless $server->_is_listening(5) and $has_connection;
 
-    my $generate_traffic = 'curl -x http://localhost:' . $proxy->port .' http://www.google.com > /dev/null 2>&1';
-    `$generate_traffic`;
+    describe 'Simple E2E test' => sub {
+        my ($ua, $proxy, $har);
 
-    $har = $proxy->har;
-    my $entry = $har->{log}->{entries}->[0];
+        before each => sub {
+            $ua = LWP::UserAgent->new;
+            $proxy = $server->create_proxy;
+            $ua->proxy($proxy->ua_proxy);
+            $ua->get('http://www.google.com');
 
-    cmp_ok($entry->{request}->{url}, '=~', qr{http://www\.google\.com}, 'verified expected url');
+            $har = $proxy->har;
+        };
+
+        it 'should contain a GET entry to google' => sub {
+            $har = $proxy->har;
+            my $entry = $har->{log}->{entries}->[0];
+
+            like($entry->{request}->{url}, qr{http://www\.google\.com});
+            is($entry->{request}->{method}, 'GET' );
+        };
+    };
 }
 
-sub is_proxy_server_running {
-    my $port = shift;
-    my $p = Net::Ping->new("tcp", 2);
-    $p->port_number($port);
-    unless ($p->ping('localhost')) {
-        plan skip_all => 'Browsermob server is not running on localhost:' . $port;
-        exit;
-    }
-
-    return 1;
-}
-
-done_testing;
+runtests;
