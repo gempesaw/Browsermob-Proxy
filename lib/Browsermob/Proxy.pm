@@ -539,26 +539,20 @@ multiple timeouts at once, if you like.
         readTimeout => 6000
     );
 
-=item requestTimeout
-
+=for :list
+* requestTimeout
 Request timeout in milliseconds. A timeout value of -1 is interpreted
 as infinite timeout. It equals -1 by default.
-
-=item readTimeout
-
+* readTimeout
 Read timeout is the timeout for waiting for data or, put differently,
 a maximum period inactivity between two consecutive data packets. A
 timeout value of zero is interpreted as an infinite timeout. It equals
 60000 by default.
-
-=item connectionTimeout
-
+* connectionTimeout
 Determines the timeout in milliseconds until a connection is
 established. A timeout value of zero is interpreted as an infinite
 timeout. It eqauls 60000 by default.
-
-=item dnsCacheTimeout
-
+* dnsCacheTimeout
 Sets the maximum length of time that records will be stored in this
 Cache. A nonpositive value disables this feature (that is, sets no
 limit). It equals 0 by default.

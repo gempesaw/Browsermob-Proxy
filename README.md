@@ -6,7 +6,7 @@ Browsermob::Proxy - Perl client for the proxies created by the Browsermob server
 
 # VERSION
 
-version 0.14
+version 0.15
 
 # SYNOPSIS
 
@@ -226,6 +226,59 @@ with the `$header` `$value` pair that you pass in.
 
 Under the covers, we are using ["filter\_request"](#filter_request) with a Javascript
 Rhino payload.
+
+## set\_timeout ( $timeoutType => $milliseconds )
+
+Set different time outs on the instantiated proxy. You can set
+multiple timeouts at once, if you like.
+
+    $proxy->timeout(
+        requestTimeout => 5000,
+        readTimeout => 6000
+    );
+
+- requestTimeout
+
+    Request timeout in milliseconds. A timeout value of -1 is interpreted
+    as infinite timeout. It equals -1 by default.
+
+- readTimeout
+
+    Read timeout is the timeout for waiting for data or, put differently,
+    a maximum period inactivity between two consecutive data packets. A
+    timeout value of zero is interpreted as an infinite timeout. It equals
+    60000 by default.
+
+- connectionTimeout
+
+    Determines the timeout in milliseconds until a connection is
+    established. A timeout value of zero is interpreted as an infinite
+    timeout. It eqauls 60000 by default.
+
+- dnsCacheTimeout
+
+    Sets the maximum length of time that records will be stored in this
+    Cache. A nonpositive value disables this feature (that is, sets no
+    limit). It equals 0 by default.
+
+## delete\_proxy
+
+Delete the proxy off of the server, shutting down the port. Although
+we do try to do this in our DEMOLISH method, we can't do anything if
+the `$proxy` object is kept around during global destruction. If
+you're noticing that your BMP server has leftover proxies, you should
+start either explicitly `undef`ing the \`$proxy\` object or invoking
+this method.
+
+    # calls ->delete_proxy in our DEMOLISH method, explicitly not
+    # during global destruction!
+    undef $proxy;
+
+    # manually delete the proxy from the BMP server
+    $proxy->delete_proxy;
+
+After deleting the proxy, invoking any other method will probably lead
+to a `die` from inside the Net::HTTP::Spore module somewhere.
 
 # SEE ALSO
 
