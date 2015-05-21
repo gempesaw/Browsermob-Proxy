@@ -518,12 +518,33 @@ $type.headers().add('$header', '$value');
 }
 
 
+=method delete_proxy
+
+Delete the proxy off of the server, shutting down the port. Although
+we do try to do this in our DEMOLISH method, we can't do anything if
+the C<$proxy> object is kept around during global destruction. If
+you're noticing that your BMP server has leftover proxies, you should
+start either explicitly C<undef>ing the `$proxy` object or invoking
+this method.
+
+    # calls ->delete_proxy in our DEMOLISH method, explicitly not
+    # during global destruction!
+    undef $proxy;
+
+    # manually delete the proxy from the BMP server
+    $proxy->delete_proxy;
+
+After deleting the proxy, invoking any other method will probably lead
+to a C<die> from inside the Net::HTTP::Spore module somewhere.
+
+=cut
 
 sub DEMOLISH {
     my ($self, $gd) = @_;
     return if $gd;
 
-    $self->delete_proxy;
+    eval { $self->delete_proxy };
+    warn $@ if $@ and $self->trace;
 }
 
 1;
