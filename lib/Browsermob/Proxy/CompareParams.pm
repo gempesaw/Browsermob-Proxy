@@ -44,21 +44,25 @@ Pass in a $har object genereated by L</Browsermob::Proxy>, as well as
 a hashref of key/value pairs of the request params that you want to
 find. In scalar context, this method will return the number of
 requests that can be found with all of the expected_params key/value
-pairs. If no requests are found, it returns that number: 0. So, the
-scalar context returns a boolean if we were able to find any matching
-requests.
+pairs. If no requests are found, it returns that number: 0. So, you
+can use the return value to check whether or not any matching requests
+were found.
 
     # look for a request matching ?expected=params&go=here
-    my $bool = cmp_request_params($har, { expected => 'params', go => 'here' });
-    say 'We found it!' if $bool;
+    my $found = cmp_request_params($har, { expected => 'params', go => 'here' });
+    say 'We found it!' if $found;
 
-In list context, the sub will return the boolean status as before, as
-well as a hashref with the missing pieces from the closest request.
+In list context, the sub will return the boolean status as before, a
+hashref with the unmatched pieces from the closest request, and a
+hashref of the actual values from the closest request.
 
-    my ($bool, $missing_params) = cmp_request_params($har, $expected);
+    my ($bool, $missing, $closest) = cmp_request_params($har, $expected);
     if ( ! $bool ) {
-        say 'We are missing: ';
-        print Dumper $missing_params;
+        say 'We cannot find these expected params: ';
+        print Dumper $missing;
+
+        say 'The closest request's respective params were: ';
+        print Dumper $closest;
     }
 
 =cut
@@ -70,6 +74,7 @@ sub cmp_request_params {
 
     # Start by assuming that we can't find any of our expected keys
     my @least_missing = keys %{ $expected };
+    my $closest = {};
 
     my @matched = grep {
         my $actual_params = $_;
@@ -93,6 +98,11 @@ sub cmp_request_params {
         # far so we can tell the caller about it when we're done
         if (scalar @missing < scalar @least_missing) {
             @least_missing = @missing;
+
+            $closest = { map {
+                $_ =~ s/^!//;
+                $_ => $actual_params->{$_}
+            } @least_missing };
         }
 
         # @missing will be empty for a successful request/assert
@@ -106,7 +116,7 @@ sub cmp_request_params {
         my $missing = { map {
             $_ => $expected->{$_}
         } @least_missing };
-        return (scalar @matched, $missing);
+        return (scalar @matched, $missing, $closest);
     }
     else {
         return scalar @matched;

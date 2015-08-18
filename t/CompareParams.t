@@ -169,6 +169,54 @@ describe 'Param comparison' => sub {
 
         };
 
+        describe 'actual params' => sub {
+
+            it 'should have key => undef for missing params' => sub {
+                $assert = {
+                    query2 => 'string2',
+                    query3 => 'string3',
+                    missing => 'param'
+                };
+
+                my ($status, $missing, $actual) = cmp_request_params($requests, $assert);
+                cmp_deeply( $actual, { missing => undef } );
+            };
+
+            it 'should have key/value for incorrect params' => sub {
+                $assert = {
+                    query2 => 'wrong',
+                    query3 => 'string3'
+                };
+
+                my (undef, undef, $actual) = cmp_request_params( $requests, $assert );
+                cmp_deeply( $actual, { query2 => 'string2' } );
+            };
+
+            it 'should have key/value for anything-but-this keys' => sub {
+                $assert = {
+                    '!query2' => 'string2',
+                    query3 => 'string3'
+                };
+
+                my (undef, undef, $actual) = cmp_request_params( $requests, $assert );
+                cmp_deeply( $actual, { query2 => 'string2' } );
+            };
+
+            it 'should have key/value for disallowed keys' => sub {
+                $assert = {
+                    '!query' => '',
+                    '!query2' => '',
+                    '!query3' => ''
+                };
+
+                my ($status, $missing, $actual) = cmp_request_params( $requests, $assert );
+                cmp_deeply( $actual, { query => 'string' } );
+            };
+
+
+        };
+
+
     };
 
     describe 'custom comparison' => sub {
