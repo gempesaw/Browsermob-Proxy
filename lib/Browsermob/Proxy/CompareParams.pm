@@ -1,6 +1,8 @@
 package Browsermob::Proxy::CompareParams;
 
 # ABSTRACT: Look for a request with the specified matching request params
+use strict;
+use warnings;
 use Carp qw/croak/;
 
 require Exporter;
@@ -149,8 +151,6 @@ sub _assert_different_value {
         # even exist, that is bad; we assert that it must exist.
         return 'needs to exist';
     }
-
-    return $ret;
 }
 
 sub _assert_missing_key {
