@@ -1,5 +1,9 @@
 Revision history for perl module Browsermob::Proxy
 
+0.16 2015-08-17
+ - Add closest match's params to return signature of
+   cmp_request_params
+
 0.1501 2015-05-21
  - Fix bug where find_open_port could return outside the range
 
