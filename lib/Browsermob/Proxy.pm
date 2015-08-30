@@ -6,6 +6,7 @@ use Carp;
 use JSON;
 use Net::HTTP::Spore;
 use Net::HTTP::Spore::Middleware::DefaultParams;
+use Net::HTTP::Spore::Middleware::Format::Text;
 
 =for markdown [![Build Status](https://travis-ci.org/gempesaw/Browsermob-Proxy.svg?branch=master)](https://travis-ci.org/gempesaw/Browsermob-Proxy)
 

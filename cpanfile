@@ -6,6 +6,7 @@ requires "LWP::UserAgent" => "0";
 requires "Moo" => "0";
 requires "Net::HTTP::Spore" => "0";
 requires "Net::HTTP::Spore::Middleware::DefaultParams" => "0";
+requires "Net::HTTP::Spore::Middleware::Format::Text" => "0";
 requires "strict" => "0";
 requires "warnings" => "0";
 
