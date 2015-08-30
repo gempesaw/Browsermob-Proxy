@@ -1,5 +1,5 @@
 package Browsermob::Proxy::CompareParams;
-$Browsermob::Proxy::CompareParams::VERSION = '0.16';
+$Browsermob::Proxy::CompareParams::VERSION = '0.17';
 # ABSTRACT: Look for a request with the specified matching request params
 use strict;
 use warnings;
@@ -256,7 +256,7 @@ Browsermob::Proxy::CompareParams - Look for a request with the specified matchin
 
 =head1 VERSION
 
-version 0.16
+version 0.17
 
 =head1 SYNOPSIS
 

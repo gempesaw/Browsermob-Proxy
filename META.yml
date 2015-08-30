@@ -30,10 +30,11 @@ requires:
   Moo: '0'
   Net::HTTP::Spore: '0'
   Net::HTTP::Spore::Middleware::DefaultParams: '0'
+  Net::HTTP::Spore::Middleware::Format::Text: '0'
   strict: '0'
   warnings: '0'
 resources:
   bugtracker: https://github.com/gempesaw/Browsermob-Proxy/issues
   homepage: https://github.com/gempesaw/Browsermob-Proxy
   repository: https://github.com/gempesaw/Browsermob-Proxy.git
-version: '0.16'
+version: '0.17'

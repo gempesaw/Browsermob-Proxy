@@ -1,5 +1,5 @@
 package Browsermob::Server;
-$Browsermob::Server::VERSION = '0.16';
+$Browsermob::Server::VERSION = '0.17';
 # ABSTRACT: Perl client to control the Browsermob Proxy server
 use strict;
 use warnings;
@@ -142,7 +142,7 @@ Browsermob::Server - Perl client to control the Browsermob Proxy server
 
 =head1 VERSION
 
-version 0.16
+version 0.17
 
 =head1 SYNOPSIS
 

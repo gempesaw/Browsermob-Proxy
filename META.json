@@ -36,6 +36,7 @@
             "Moo" : "0",
             "Net::HTTP::Spore" : "0",
             "Net::HTTP::Spore::Middleware::DefaultParams" : "0",
+            "Net::HTTP::Spore::Middleware::Format::Text" : "0",
             "strict" : "0",
             "warnings" : "0"
          }
@@ -66,6 +67,6 @@
          "web" : "https://github.com/gempesaw/Browsermob-Proxy"
       }
    },
-   "version" : "0.16"
+   "version" : "0.17"
 }
 

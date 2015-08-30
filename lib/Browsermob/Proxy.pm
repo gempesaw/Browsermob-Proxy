@@ -1,11 +1,12 @@
 package Browsermob::Proxy;
-$Browsermob::Proxy::VERSION = '0.16';
+$Browsermob::Proxy::VERSION = '0.17';
 # ABSTRACT: Perl client for the proxies created by the Browsermob server
 use Moo;
 use Carp;
 use JSON;
 use Net::HTTP::Spore;
 use Net::HTTP::Spore::Middleware::DefaultParams;
+use Net::HTTP::Spore::Middleware::Format::Text;
 
 
 my $spec = {
@@ -320,7 +321,7 @@ Browsermob::Proxy - Perl client for the proxies created by the Browsermob server
 
 =head1 VERSION
 
-version 0.16
+version 0.17
 
 =head1 SYNOPSIS
 
