@@ -1,5 +1,9 @@
 Revision history for perl module Browsermob::Proxy
 
+0.17 2015-08-30
+ - Fix failing tests by depending on new Format::Text middleware
+   standalone module
+
 0.16 2015-08-17
  - Add closest match's params to return signature of
    cmp_request_params
